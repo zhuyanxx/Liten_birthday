@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小藤子的专属时光机</title>
+    <style>
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e1b4b 0%, #0f172a 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 底层点阵网格 */
+        .grid-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -2;
+            opacity: 0.5;
+        }
+
+        /* 背景呼吸光晕 */
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            animation: pulse 8s infinite alternate;
+        }
+        .glow-pink {
+            width: 400px; height: 400px;
+            background: rgba(236, 72, 153, 0.25);
+            top: -100px; left: -100px;
+        }
+        .glow-blue {
+            width: 500px; height: 500px;
+            background: rgba(56, 189, 248, 0.2);
+            bottom: -150px; right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.2); opacity: 0.9; }
+        }
+
+        /* Canvas 粒子画布 */
+        #starfield {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none; /* 防止遮挡点击事件 */
+        }
+
+        /* 内容层（比 Canvas 高一层） */
+        .content-layer {
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            letter-spacing: 8px;
+            margin-bottom: 3rem;
+            text-shadow: 0 0 20px rgba(255,255,255,0.4);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        /* 按钮容器 */
+        .button-container {
+            display: flex;
+            gap: 3rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        /* 玻璃拟态卡片按钮 */
+        .btn {
+            width: 220px;
+            height: 280px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.03); /* 更透明一点 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(255,255,255,0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn h2 {
+            color: #fff;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+            background: linear-gradient(to right, #fbcfe8, #bae6fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s;
+        }
+
+        .btn p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover p {
+            color: #fff;
+        }
+
+        /* 发光边框特效 */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ec4899, #38bdf8);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .btn:hover::before {
+            opacity: 1;
+        }
+
+        /* 入场动画 */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 全局淡出遮罩层 */
+        #fade-mask {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #0f172a;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景层 -->
+    <div class="grid-bg"></div>
+    <div class="glow glow-pink"></div>
+    <div class="glow glow-blue"></div>
+    <canvas id="starfield"></canvas>
+
+    <!-- 内容层 -->
+    <div class="content-layer">
+        <h1>小藤子的专属时光机</h1>
+
+        <div class="button-container">
+            <!-- 2025 按钮 -->
+            <div class="btn" onclick="goToPage('2025/index.html')">
+                <h2>2025</h2>
+                <p>重温昨日美好</p>
+            </div>
+
+            <!-- 2026 按钮 -->
+            <div class="btn" onclick="goToPage('2026/index.html')">
+                <h2>2026</h2>
+                <p>开启今日惊喜</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面跳转的渐变遮罩 -->
+    <div id="fade-mask"></div>
+
+    <script>
+        // ================= 1. 星尘粒子与流星特效 (Canvas) =================
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        let meteors = [];
+
+        // 调整画布大小
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 粒子类
+        class Particle {
+            constructor() {
+                this.reset();
+                this.y = Math.random() * height; // 初始随机位置
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height + 10; // 从底部开始
+                this.size = Math.random() * 2 + 0.5;
+                this.speedY = Math.random() * 1 + 0.5; // 向上漂浮速度
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                // 颜色：偏粉、偏蓝、偏金
+                const colors = ['rgba(255, 182, 193,', 'rgba(135, 206, 250,', 'rgba(255, 215, 0,'];
+                this.colorBase = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                // 如果飘出屏幕顶部，重置到底部
+                if (this.y < -10) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.colorBase + this.opacity + ')';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.colorBase + '0.8)';
+                ctx.fill();
+            }
+        }
+
+        // 流星类
+        class Meteor {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width + width * 0.5; // 偏右侧出现
+                this.y = Math.random() * height * 0.5 - height * 0.5;
+                this.length = Math.random() * 150 + 100;
+                this.speed = Math.random() * 10 + 5;
+                this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1); // 约 45 度角
+                this.opacity = 1;
+                this.active = false;
+            }
+            update() {
+                if (!this.active) {
+                    if (Math.random() < 0.005) this.active = true; // 随机触发
+                    return;
+                }
+                this.x -= Math.cos(this.angle) * this.speed;
+                this.y += Math.sin(this.angle) * this.speed;
+                this.opacity -= 0.01;
+
+                if (this.opacity <= 0 || this.x < -this.length || this.y > height + this.length) {
+                    this.reset();
+                }
+            }
+            draw() {
+                if (!this.active || this.opacity <= 0) return;
+                ctx.beginPath();
+                const endX = this.x + Math.cos(this.angle) * this.length;
+                const endY = this.y - Math.sin(this.angle) * this.length;
+                const gradient = ctx.createLinearGradient(this.x, this.y, endX, endY);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+        }
+
+        // 初始化粒子
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+        }
+        // 初始化流星（创建 3 个对象循环使用）
+        for (let i = 0; i < 3; i++) {
+            meteors.push(new Meteor());
+        }
+
+        // 动画循环
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制粒子
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // 绘制流星
+            meteors.forEach(m => {
+                m.update();
+                m.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+
+        // ================= 2. 页面跳转逻辑 =================
+        function goToPage(url) {
+            const mask = document.getElementById('fade-mask');
+            mask.style.pointerEvents = 'auto';
+            mask.style.opacity = '1';
+
+            setTimeout(() => {
+                window.location.href = url;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

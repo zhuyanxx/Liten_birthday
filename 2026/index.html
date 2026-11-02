@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 生日快乐</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* ================= 基础重置与全局样式 ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #fce3be 0%, #f9d5d3 50%, #e7c8f5 100%);
+            font-family: 'Noto Serif SC', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            color: #5a3b1c;
+            transition: background 2s ease, color 1s ease;
+        }
+        
+        /* 深空质感背景 */
+        body.night-mode { 
+            background: radial-gradient(circle at 50% 30%, #11182d 0%, #060812 60%, #000000 100%); 
+            color: #fff; 
+        }
+        
+        #bg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; transition: opacity 1.5s; }
+        body.night-mode #bg-canvas { opacity: 0; }
+
+        /* ================= 🌟 缓缓飘落的星与花 ================= */
+        .falling-element {
+            position: fixed; top: -50px; z-index: 9999; pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 15px rgba(161, 196, 253, 0.5));
+            animation-name: fallAndSway; animation-timing-function: linear; animation-fill-mode: forwards; opacity: 0;
+        }
+        @keyframes fallAndSway {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.9; }
+            50% { transform: translateY(50vh) translateX(30px) rotate(180deg); opacity: 0.9; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(110vh) translateX(-30px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ================= 页面容器 ================= */
+        .page-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
+        .page {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            filter: blur(6px);
+            transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                        transform 0.6s cubic-bezier(0.25, 1, 0.5, 1),
+                        filter 0.6s ease, visibility 0.6s;
+            padding: 40px; z-index: 1;
+        }
+        /* 各页不同的入场方向 */
+        #page-1 { transform: scale(0.95) translateY(20px); }
+        #page-2 { transform: scale(0.96) translateX(30px); }
+        #page-3 { transform: scale(0.96) translateY(-20px); }
+        #page-4 { transform: scale(0.94); }
+
+        .page.active {
+            opacity: 1; visibility: visible;
+            transform: scale(1) translate(0, 0);
+            filter: blur(0);
+        }
+        .page::before {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80vw; height: 80vh; border-radius: 50%; filter: blur(100px); z-index: -1; transition: all 1s;
+        }
+        #page-1::before { background: rgba(255, 182, 193, 0.4); }
+        #page-2::before { background: rgba(139, 0, 0, 0.2); }
+        #page-3::before { background: rgba(176, 224, 230, 0.4); }
+        #page-4::before { opacity: 0; }
+
+        /* ================= 导航与按钮 ================= */
+        .header h1 {
+            font-size: 3.2rem; letter-spacing: 4px; margin-bottom: 20px;
+            font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+            font-weight: 900;
+            background: linear-gradient(to right, #d44666, #b92b27, #e65c00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 15px rgba(255, 255, 255, 0.6); transition: all 1s;
+        }
+        body.night-mode .header h1 {
+            background: linear-gradient(to right, #a1c4fd, #c2e9fb, #fbc2eb);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .top-controls { position: absolute; top: 30px; right: 30px; display: flex; gap: 15px; z-index: 100; }
+        .icon-btn {
+            width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.9);
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); font-size: 24px; color: #d44666;
+        }
+        body.night-mode .icon-btn {
+            background: rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.2);
+            color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .icon-btn:hover { transform: scale(1.1) rotate(15deg); }
+        .music-icon { animation: spin 3s linear infinite; animation-play-state: paused; }
+        .icon-btn.playing .music-icon { animation-play-state: running; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .nav-bar {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; padding: 12px 25px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 100; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: all 1s;
+        }
+        body.night-mode .nav-bar { background: rgba(0, 0, 0, 0.6); border-color: rgba(255,255,255,0.1); }
+        .nav-btn { padding: 12px 24px; font-size: 1.05rem; border-radius: 30px; cursor: pointer; transition: all 0.3s; color: #8a6d55; font-weight: 600; }
+        body.night-mode .nav-btn { color: #ccc; }
+        .nav-btn.active, .nav-btn:hover { background: #ffffff; color: #d44666; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        body.night-mode .nav-btn.active, body.night-mode .nav-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+        /* ================= 页面 1：3D 轮播照片墙 ================= */
+        #page-1 { perspective: 2000px; }
+        .page-1-bg-text {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 15vw; font-weight: 900;
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            white-space: nowrap;
+            color: rgba(255, 255, 255, 0.15); z-index: -1; pointer-events: none;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        .page-1-deco { position: absolute; top: 8%; left: 8%; text-align: left; z-index: 2; pointer-events: none; }
+        .page-1-deco h2 {
+            font-size: 2.2rem; font-family: 'Cormorant Garamond', 'Noto Serif SC', serif;
+            font-style: italic; color: #d44666; letter-spacing: 2px;
+        }
+        .page-1-deco p { font-family: 'Cormorant Garamond', monospace; color: #8a6d55; letter-spacing: 4px; margin-top: 5px; }
+        .page-1-deco-right { position: absolute; bottom: 12%; right: 8%; text-align: right; z-index: 2; pointer-events: none; }
+        .page-1-deco-right p {
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-size: 1.2rem; color: #d44666; letter-spacing: 2px; line-height: 1.6;
+        }
+
+        .carousel-container {
+            position: relative; width: 100%; height: 65vh;
+            display: flex; align-items: center; justify-content: center;
+            transform-style: preserve-3d; margin-top: 10px;
+        }
+        .carousel { position: relative; width: 340px; height: 480px; transform-style: preserve-3d; }
+        
+        .carousel-item {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: 16px; cursor: pointer;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px) saturate(1.1);
+            -webkit-backdrop-filter: blur(10px) saturate(1.1);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 14px 14px 110px 14px;
+            box-shadow: 0 10px 30px rgba(120, 60, 60, 0.12), 0 20px 40px rgba(0,0,0,0.15);
+            will-change: transform, opacity, filter;
+        }
+        .carousel-item.active {
+            background: #fff;
+            box-shadow: 0 25px 60px rgba(212, 70, 102, 0.4), 0 0 0 3px #fff;
+        }
+        .carousel-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+        
+        .carousel-caption {
+            position: absolute; bottom: 25px; left: 0; width: 100%;
+            text-align: center; padding: 0 20px;
+            font-family: 'Noto Serif SC', '楷体', serif; font-style: italic;
+            font-size: 1.15rem; line-height: 1.8; letter-spacing: 1px; font-weight: 600;
+            background: linear-gradient(to right, #d44666, #b92b27, #e65c00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            transition: all 0.4s; opacity: 0.7; 
+        }
+        .carousel-item.active .carousel-caption { opacity: 1; transform: scale(1.05); text-shadow: 0 4px 15px rgba(212, 70, 102, 0.2); }
+        .carousel-item.active img { filter: brightness(1.05) contrast(1.05); }
+
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.8); color: #d44666; font-size: 26px; font-weight: bold;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            z-index: 10; transition: all 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+        .btn-prev { left: 12%; }
+        .btn-next { right: 12%; }
+        .dots-container { position: absolute; bottom: 2%; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 10; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(212, 70, 102, 0.3); cursor: pointer; transition: all 0.3s; }
+        .dot.active { width: 25px; border-radius: 5px; background: #d44666; box-shadow: 0 0 10px rgba(212, 70, 102, 0.5); }
+
+        /* ================= 🌟 页面 2：高定复古火漆信封 ================= */
+        .envelope-scene {
+            position: relative; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        /* 暖红 + 金的深色包边，替换掉原警告色 */
+        .envelope-scene::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 32%, rgba(120, 30, 40, 0.5) 72%, rgba(60, 12, 20, 0.85) 100%);
+            pointer-events: none; z-index: 0;
+        }
+
+        .envelope-wrapper {
+            position: relative; width: 760px; max-width: 90vw; height: 500px;
+            margin-top: -30px; z-index: 2;
+            perspective: 1500px; 
+        }
+
+        /* 信纸部分 */
+        .letter-paper {
+            position: absolute; top: 20px; left: 5%; width: 90%; height: 460px;
+            background-color: #fffdf2;
+            background-image: repeating-linear-gradient(transparent, transparent 39px, rgba(212, 70, 102, 0.15) 39px, rgba(212, 70, 102, 0.15) 40px);
+            background-position: 0 10px;
+            border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 50px 60px; color: #4a2c0f; font-size: 1.25rem; line-height: 40px; 
+            font-family: 'Noto Serif SC', '楷体', 'Georgia', serif; letter-spacing: 2px;
+            transform: translateY(50px); transition: all 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1; opacity: 0;
+        }
+        .envelope-wrapper.open .letter-paper { transform: translateY(-100px); opacity: 1; z-index: 10; }
+
+        .typewriter { display: inline-block; overflow: hidden; white-space: pre-wrap; border-right: 2px solid #d44666; animation: blink 0.8s step-end infinite; }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        /* 信封主体 */
+        .envelope-body {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: #fdf5e6; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.05);
+            z-index: 5; transition: all 0.5s;
+        }
+        .envelope-front {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: #f5e6cc; border-radius: 10px;
+            clip-path: polygon(0 0, 50% 45%, 100% 0, 100% 100%, 0 100%);
+            z-index: 6; box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+        }
+        .envelope-front::before, .envelope-front::after {
+            content: ''; position: absolute; top: 0; width: 50%; height: 100%; background: #ebd9ba;
+        }
+        .envelope-front::before { left: 0; clip-path: polygon(0 0, 100% 50%, 0 100%); }
+        .envelope-front::after { right: 0; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+
+        /* 信封上盖（可翻折） */
+        .envelope-flap {
+            position: absolute; top: 0; left: 0; width: 100%; height: 50%;
+            background: #fdf5e6; clip-path: polygon(0 0, 100% 0, 50% 100%);
+            z-index: 7; transform-origin: top;
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
+            border-radius: 10px 10px 0 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .envelope-wrapper.open .envelope-flap { transform: rotateX(180deg); z-index: 0; background: #ebd9ba; }
+
+        /* 火漆印章（带蜡质纹理） */
+        .wax-seal {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            width: 90px; height: 90px; border-radius: 50%;
+            background:
+                radial-gradient(circle at 32% 28%, #d4574a, #8e2a20 55%, #5c1712 100%),
+                conic-gradient(from 20deg, rgba(255,255,255,.08), transparent 30%, rgba(0,0,0,.12) 60%, transparent);
+            background-blend-mode: overlay;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset -3px -3px 10px rgba(0,0,0,0.5), inset 3px 3px 10px rgba(255,255,255,0.3);
+            z-index: 8; display: flex; justify-content: center; align-items: center;
+            color: rgba(255,255,255,0.7); font-size: 35px; cursor: pointer;
+            transition: all 0.4s; border: 2px solid #8e2a20;
+        }
+        .wax-seal::after { content: '❤'; }
+        .wax-seal:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            box-shadow: 0 8px 25px rgba(192, 57, 43, 0.6), inset -3px -3px 10px rgba(0,0,0,0.5), inset 3px 3px 10px rgba(255,255,255,0.3);
+        }
+        .envelope-wrapper.open .wax-seal { opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(1.5); }
+
+        /* 邮票装饰 */
+        .stamp {
+            position: absolute; top: 15px; right: 15px; width: 70px; height: 90px;
+            background: #fff; padding: 5px; z-index: 8; border: 1px dashed #aaa;
+            transform: rotate(5deg); box-shadow: 0 2px 5px rgba(0,0,0,0.1); pointer-events: none;
+            background-image: url('imgs/photo1.jpg');
+            background-size: cover; background-position: center;
+        }
+        .voice-tip {
+            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+            font-size: 0.95rem; color: #d44666; opacity: 0; transition: opacity 0.5s;
+            font-family: 'Noto Serif SC', sans-serif;
+        }
+        .voice-tip.show { opacity: 1; animation: pulse 1.5s infinite alternate; }
+        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* ================= 🌟 页面 3：3D 立体魔法礼盒 ================= */
+        .gift-box-wrapper { 
+            position: relative; z-index: 10; 
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1); 
+            perspective: 1000px;
+        }
+        .gift-box-wrapper.opened { transform: scale(0) rotate(180deg); opacity: 0; pointer-events: none; }
+        .gift-box { width: 160px; height: 160px; cursor: pointer; position: relative; }
+        .box-3d {
+            width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+            transform: rotateX(-25deg) rotateY(45deg);
+            animation: floatGift3D 4s ease-in-out infinite alternate;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .gift-box:hover .box-3d { transform: rotateX(-15deg) rotateY(180deg) scale(1.1); }
+        @keyframes floatGift3D {
+            0% { transform: rotateX(-25deg) rotateY(45deg) translateY(0); }
+            100% { transform: rotateX(-25deg) rotateY(45deg) translateY(-20px); }
+        }
+
+        .box-face {
+            position: absolute; width: 160px; height: 160px; border-radius: 4px;
+            box-shadow: inset 0 0 30px rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        .face-front { background: linear-gradient(135deg, #fbc2eb, #a6c1ee); transform: translateZ(80px); opacity: 0.9; }
+        .face-back { background: linear-gradient(135deg, #e0a9cf, #8fa9d6); transform: rotateY(180deg) translateZ(80px); opacity: 0.8; }
+        .face-right { background: linear-gradient(135deg, #e0a9cf, #8fa9d6); transform: rotateY(90deg) translateZ(80px); opacity: 0.9; }
+        .face-left { background: linear-gradient(135deg, #e0a9cf, #8fa9d6); transform: rotateY(-90deg) translateZ(80px); opacity: 0.9; }
+        .face-top {
+            background: linear-gradient(135deg, #fed4f4, #bbd2fe);
+            transform: rotateX(90deg) translateZ(80px); opacity: 0.95;
+            box-shadow: inset 0 0 40px rgba(255,255,255,0.8), 0 0 30px rgba(161,196,253,0.4);
+        }
+        .face-bottom { background: #8fa9d6; transform: rotateX(-90deg) translateZ(80px); opacity: 0.8; }
+
+        .ribbon { position: absolute; background: rgba(255, 255, 255, 0.8); box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); z-index: 2; }
+        .ribbon-v { width: 30px; height: 100%; left: 50%; margin-left: -15px; transform: translateZ(81px); background: linear-gradient(to right, transparent, #fff, transparent); opacity: 0.7; }
+        .ribbon-h { width: 100%; height: 30px; top: 50%; margin-top: -15px; transform: translateZ(81px); background: linear-gradient(to bottom, transparent, #fff, transparent); opacity: 0.7; }
+
+        .bow {
+            position: absolute; top: -60px; left: 50%; transform: translateX(-50%) translateZ(85px);
+            font-size: 70px;
+            filter: drop-shadow(0 12px 18px rgba(212,70,102,.55)) drop-shadow(0 0 10px rgba(255,255,255,.8));
+            animation: bowFloat 2s ease-in-out infinite alternate; z-index: 10;
+        }
+        @keyframes bowFloat {
+            0% { transform: translateX(-50%) translateZ(85px) translateY(0); }
+            100% { transform: translateX(-50%) translateZ(85px) translateY(-10px); }
+        }
+
+        .gift-text { position: absolute; bottom: -80px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; white-space: nowrap; pointer-events: none; }
+        .gift-text span:nth-child(1) {
+            font-family: 'Cormorant Garamond', monospace;
+            font-size: 0.9rem; letter-spacing: 3px; color: #d44666; font-weight: bold;
+            animation: pulse 1.5s infinite alternate;
+        }
+        .gift-text span:nth-child(2) {
+            font-family: 'Noto Serif SC', sans-serif;
+            font-size: 1.3rem; font-weight: bold; letter-spacing: 5px;
+            background: linear-gradient(to right, #d44666, #e65c00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(212, 70, 102, 0.2);
+        }
+
+        /* 星空展示层 */
+        .starry-surprise {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: all 1.5s ease; overflow: hidden;
+        }
+        .starry-surprise.show { opacity: 1; visibility: visible; }
+        #bg-stars-surprise { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        .aurora-glow {
+            position: absolute; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+            background: radial-gradient(circle at 20% 30%, rgba(60, 80, 180, 0.15) 0%, transparent 40%), radial-gradient(circle at 80% 60%, rgba(140, 50, 150, 0.1) 0%, transparent 45%), radial-gradient(circle at 50% 80%, rgba(50, 120, 150, 0.1) 0%, transparent 50%);
+            animation: auroraShift 15s infinite alternate linear; mix-blend-mode: screen; 
+        }
+        @keyframes auroraShift {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+            50% { transform: scale(1.1) translate(-2%, 2%); opacity: 0.9; }
+            100% { transform: scale(1.2) translate(2%, -2%); opacity: 0.7; }
+        }
+
+        .dual-compass-container { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .compass-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .wrapper-2026 { transform: translateX(-4vw) translateY(5vh) scale(0.8); opacity: 0; transition: all 2s cubic-bezier(0.25,1,0.5,1) 0.2s; }
+        .wrapper-2005 { transform: translateX(2vw) translateY(-5vh) scale(0.8); opacity: 0; transition: all 2s cubic-bezier(0.25,1,0.5,1) 0.6s; }
+        .starry-surprise.show .wrapper-2026 { transform: translateX(-4vw) translateY(2vh) scale(1); opacity: 1; }
+        .starry-surprise.show .wrapper-2005 { transform: translateX(2vw) translateY(-8vh) scale(1); opacity: 1; }
+
+        .wrapper-2026 .cosmos-compass { width: 52vmin; height: 52vmin; max-width: 500px; max-height: 500px; }
+        .wrapper-2005 .cosmos-compass { width: 35vmin; height: 35vmin; max-width: 320px; max-height: 320px; }
+
+        .compass-title {
+            margin-bottom: 15px; font-family: 'Noto Serif SC', 'Georgia', serif;
+            color: #fff; font-size: 1.1rem; letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.4);
+            border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px;
+        }
+        .wrapper-2026 .compass-title { font-size: 1.3rem; color: #a1c4fd; }
+        .wrapper-2005 .compass-title { font-size: 1rem; color: #fbc2eb; }
+
+        .cosmos-compass {
+            position: relative; border-radius: 50%;
+            box-shadow: 0 0 60px rgba(161, 196, 253, 0.2), inset 0 0 40px rgba(161, 196, 253, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.15); overflow: hidden; background: rgba(0, 0, 0, 0.2);
+        }
+        .starry-surprise.show .wrapper-2026 .cosmos-compass { animation: compassFloat 6s ease-in-out infinite alternate 2.2s; }
+        .starry-surprise.show .wrapper-2005 .cosmos-compass { animation: compassFloat 6s ease-in-out infinite alternate 2.6s; }
+        .wrapper-2005 .cosmos-compass { box-shadow: 0 0 50px rgba(251, 194, 235, 0.15), inset 0 0 30px rgba(251, 194, 235, 0.15); }
+        @keyframes compassFloat { 0% { transform: translateY(0); } 100% { transform: translateY(-8px); } }
+
+        .star-trail-bg {
+            position: absolute; top: 50%; left: 50%; width: 180%; height: 180%;
+            object-fit: cover; opacity: 0.45; z-index: 1; pointer-events: none;
+            transform: translate(-50%, -50%); animation: rotateTrail 120s linear infinite;
+        }
+        .wrapper-2005 .star-trail-bg { animation-duration: 160s; animation-direction: reverse; }
+        @keyframes rotateTrail {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .sky-map-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+        .compass-ring {
+            position: absolute; top: 4%; left: 4%; width: 92%; height: 92%;
+            border-radius: 50%; border: 1px dashed rgba(255, 255, 255, 0.2);
+            z-index: 3; pointer-events: none;
+        }
+        .compass-ring::after {
+            content: ''; position: absolute; top: 2%; left: 2%; width: 96%; height: 96%;
+            border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .compass-text {
+            position: absolute; color: #a1c4fd; font-family: 'Cormorant Garamond', monospace;
+            font-size: 0.9rem; font-weight: bold; z-index: 4;
+            text-shadow: 0 0 8px rgba(161, 196, 253, 0.8);
+        }
+        .wrapper-2005 .compass-text { color: #fbc2eb; font-size: 0.8rem; text-shadow: 0 0 8px rgba(251, 194, 235, 0.8); }
+        .compass-text.n { top: 3%; left: 50%; transform: translateX(-50%); }
+        .compass-text.s { bottom: 3%; left: 50%; transform: translateX(-50%); }
+        .compass-text.e { right: 3%; top: 50%; transform: translateY(-50%); }
+        .compass-text.w { left: 3%; top: 50%; transform: translateY(-50%); }
+
+        .location-info { margin-top: 15px; display: flex; align-items: center; gap: 8px; opacity: 0; transition: opacity 1.5s ease 1.2s; }
+        .starry-surprise.show .location-info { opacity: 1; }
+        .loc-line { width: 30px; height: 1px; background: linear-gradient(to right, transparent, #a1c4fd); }
+        .loc-line:last-child { background: linear-gradient(to left, transparent, #a1c4fd); }
+        .loc-text {
+            font-family: 'Cormorant Garamond', monospace;
+            color: #a1c4fd; letter-spacing: 1px; font-size: 0.85rem;
+            text-shadow: 0 0 10px rgba(161,196,253,0.6); text-align: center;
+        }
+        .wrapper-2005 .loc-text { color: #fbc2eb; font-size: 0.8rem; }
+        .wrapper-2005 .loc-line { background: linear-gradient(to right, transparent, #fbc2eb); }
+        .wrapper-2005 .loc-line:last-child { background: linear-gradient(to left, transparent, #fbc2eb); }
+
+        .art-text-container { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .art-text {
+            position: absolute; color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 20px #a1c4fd;
+            white-space: nowrap;
+        }
+        .text-1 {
+            top: 12%; left: 6%; text-align: left; font-size: 2rem;
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-style: italic; letter-spacing: 2px; line-height: 1.4;
+            opacity: 0; transform: translateY(30px); transition: all 1.5s ease 1.5s;
+        }
+        .text-2 {
+            bottom: 15%; left: 8%; text-align: left; font-size: 1.2rem;
+            font-family: 'Cormorant Garamond', 'Courier New', monospace;
+            letter-spacing: 6px; font-weight: bold;
+            color: rgba(251, 194, 235, 0.9);
+            text-shadow: 0 0 15px rgba(251, 194, 235, 0.6);
+            opacity: 0; transform: translateY(-30px); transition: all 1.5s ease 1.8s;
+        }
+        .starry-surprise.show .text-1 { opacity: 1; transform: translateY(0); animation: floatText 6s ease-in-out infinite alternate 3s; }
+        .starry-surprise.show .text-2 { opacity: 1; transform: translateY(0); animation: floatText 7s ease-in-out infinite alternate-reverse 3.3s; }
+        @keyframes floatText { 0% { transform: translateY(0); opacity: 0.8; } 100% { transform: translateY(-15px); opacity: 1; } }
+
+        .core-photo-container {
+            position: absolute; bottom: 10%; right: 8%; z-index: 6;
+            width: 180px; height: 230px; padding: 10px 10px 35px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            opacity: 0; transform: translateX(100px) rotate(20deg);
+            transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.2s;
+        }
+        .starry-surprise.show .core-photo-container {
+            opacity: 1; transform: translateX(0) rotate(8deg);
+            animation: floatPhotoRight 6s ease-in-out infinite alternate 3.7s;
+        }
+        .core-photo-container:hover {
+            transform: rotate(0deg) scale(1.05) !important;
+            box-shadow: 0 0 40px rgba(161, 196, 253, 0.6);
+            transition: all 0.4s; animation-play-state: paused;
+        }
+        .core-photo { width: 100%; height: 100%; border-radius: 4px; object-fit: cover; filter: contrast(1.1) brightness(1.1); }
+        .core-photo-container p {
+            position: absolute; bottom: 6px; left: 0; right: 0;
+            text-align: center; font-size: 0.65rem; color: rgba(255,255,255,0.75);
+            letter-spacing: 0.5px; padding: 0 6px; line-height: 1.2;
+            font-family: 'Noto Serif SC', serif; pointer-events: none; z-index: 3;
+        }
+        .core-photo-container::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(161, 196, 253, 0.1) 50%);
+            background-size: 100% 4px; z-index: 2; pointer-events: none;
+        }
+        .core-photo-container::after {
+            content: ''; position: absolute; top: 0; left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 50px; height: 15px; background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        @keyframes floatPhotoRight {
+            0% { transform: translateY(0) rotate(8deg); }
+            100% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .reset-surprise-btn {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; padding: 10px 20px; border-radius: 20px; cursor: pointer;
+            z-index: 10; opacity: 0; transition: opacity 0.5s;
+            backdrop-filter: blur(5px);
+            font-family: 'Noto Serif SC', sans-serif;
+        }
+        .starry-surprise.show ~ .reset-surprise-btn { opacity: 1; pointer-events: auto; transition-delay: 4s; }
+        .reset-surprise-btn:hover { background: rgba(255,255,255,0.3); }
+
+        /* ================= 先导艺术字 ================= */
+        .intro-text {
+            position: absolute; top: 20%; left: 50%;
+            transform: translate(-50%, 20px) scale(0.9);
+            width: 100%; text-align: center;
+            opacity: 0; transition: all 2s cubic-bezier(0.25, 1, 0.5, 1);
+            pointer-events: none; z-index: 20;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+        .intro-text .deco-line {
+            width: 200px; height: 1px;
+            background: linear-gradient(to right, transparent, #a1c4fd, transparent);
+            box-shadow: 0 0 10px #a1c4fd;
+        }
+        .intro-text h2 {
+            font-size: 2.8rem; font-weight: 800; letter-spacing: 8px;
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(to right, #ffffff, #a1c4fd, #fbc2eb);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(161, 196, 253, 0.6);
+        }
+        .intro-text p {
+            font-size: 1.2rem; letter-spacing: 15px; color: #fbc2eb; font-weight: bold;
+            text-shadow: 0 0 15px rgba(251, 194, 235, 0.8);
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-style: italic;
+        }
+        .intro-text .en-text {
+            font-size: 0.9rem; letter-spacing: 5px; color: rgba(255,255,255,0.5);
+            font-family: 'Cormorant Garamond', monospace;
+        }
+        .intro-text.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+
+        /* ================= 页面 4：许愿池 ================= */
+        #wish-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0; pointer-events: none; transition: opacity 2s; }
+        body.night-mode #wish-canvas { opacity: 1; pointer-events: auto; }
+
+        /* ===== 背景星图 / 星轨轮播 ===== */
+        .wish-bg-slideshow {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .wish-bg-slide {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transform: scale(1.02);
+            transition: opacity 2.5s ease, transform 9s ease;
+            filter: brightness(0.6) saturate(0.9) blur(0.5px);
+        }
+        .wish-bg-slide.active {
+            opacity: 0.18;
+            transform: scale(1.08);
+        }
+        body.night-mode .wish-bg-slide.active { opacity: 0.4; }
+
+        .cake-scene { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; transition: all 1.5s ease; margin-top: 20px; }
+        .click-hint { display: flex; flex-direction: column; align-items: center; margin-bottom: 15px; animation: bounceHint 2s infinite; }
+        .click-hint span {
+            font-size: 1rem; font-family: 'Noto Serif SC', 'Georgia', serif;
+            font-style: italic; color: #d44666; font-weight: bold; letter-spacing: 2px;
+        }
+        .click-hint .arrow { font-size: 1.5rem; margin-top: 5px; }
+        @keyframes bounceHint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .cake {
+            font-size: 140px; cursor: pointer;
+            filter: drop-shadow(0 20px 30px rgba(212, 70, 102, 0.4));
+            transition: transform 0.3s, filter 0.5s; position: relative; z-index: 10;
+        }
+        .cake:hover { transform: scale(1.1) rotate(5deg); }
+        .cake-scene.blown .cake { filter: grayscale(1) opacity(0.1) drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(0.6) translateY(100px); pointer-events: none; }
+        .cake-scene.blown .click-hint { opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+        .cake-scene.blown .cute-doll { opacity: 0; transform: scale(0); transition: all 1s; }
+
+        .cute-doll {
+            position: absolute; bottom: 10%; font-size: 60px; z-index: 9;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+            animation: floatDoll 3s ease-in-out infinite alternate;
+        }
+        .doll-left { left: -80px; }
+        .doll-right { right: -80px; animation-delay: 1.5s; }
+        @keyframes floatDoll {
+            0% { transform: translateY(0) rotate(-5deg); }
+            100% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .wish-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0.3);
+            font-size: 3rem; font-weight: 800; letter-spacing: 10px;
+            color: #fff; text-align: center; line-height: 1.5;
+            font-family: 'Noto Serif SC', serif;
+            text-shadow: 0 0 20px #a1c4fd, 0 0 40px #c2e9fb, 0 0 80px #fbc2eb;
+            opacity: 0; pointer-events: none; z-index: 10;
+            transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
+        }
+        .wish-text.show { opacity: 1; transform: translate(-50%, -50%) scale(1); animation: textGlow 2s infinite alternate 3s; }
+        .wish-text span {
+            font-family: 'Cormorant Garamond', monospace;
+        }
+        @keyframes textGlow {
+            from { text-shadow: 0 0 20px #a1c4fd, 0 0 40px #c2e9fb; }
+            to { text-shadow: 0 0 30px #fff, 0 0 60px #fbc2eb, 0 0 100px #a1c4fd; }
+        }
+
+        .memory-photos-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+        .memory-img {
+            position: absolute; border-radius: 15px;
+            border: 4px solid rgba(255,255,255,0.8);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            opacity: 0;
+            transform: scale(0.8) translateY(20px) rotate(var(--rot, 0deg));
+            transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none; object-fit: cover;
+        }
+        .memory-img.show {
+            opacity: 1;
+            transform: scale(1) translateY(0) rotate(var(--rot, 0deg));
+            animation: floatPhoto 4s ease-in-out infinite alternate;
+        }
+        @keyframes floatPhoto {
+            0% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+            100% { transform: translateY(-15px) rotate(calc(var(--rot, 0deg) + 2deg)); }
+        }
+        
+        .mem-1 { top: 15%; left: 10%; width: 220px; height: 280px; --rot: -6deg; }
+        .mem-2 { top: 18%; right: 12%; width: 240px; height: 240px; --rot: 5deg; }
+        .mem-3 { bottom: 18%; left: 15%; width: 250px; height: 250px; --rot: 7deg; }
+        .mem-4 { bottom: 15%; right: 10%; width: 220px; height: 290px; --rot: -8deg; }
+        .mem-5 { top: 42%; left: 5%; width: 200px; height: 260px; --rot: 4deg; }
+        .mem-6 { top: 44%; right: 5%; width: 200px; height: 240px; --rot: -5deg; }
+        .mem-7 { bottom: 8%; left: 50%; width: 230px; height: 230px; --rot: 3deg; }
+
+        .poetic-text {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0; transition: all 2.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Noto Serif SC', 'Georgia', serif;
+            font-style: italic; color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 0 20px #a1c4fd;
+            pointer-events: none; z-index: 6; letter-spacing: 2px;
+        }
+        #page-4.show-poems .poem-1 { top: 20%; left: 50%; transform: translate(-50%, 0) scale(1); opacity: 1; transition-delay: 0.8s; font-size: 1.2rem; letter-spacing: 6px; }
+        #page-4.show-poems .poem-2 { top: auto; bottom: 22%; left: 50%; transform: translate(-50%, 0) scale(1); opacity: 1; transition-delay: 1.2s; font-size: 1.1rem; letter-spacing: 4px; color: #fbc2eb; text-shadow: 0 0 10px rgba(251,194,235,0.5); }
+        #page-4.show-poems .poem-3 { top: 35%; left: 8%; transform: translate(0, 0) scale(1); opacity: 1; transition-delay: 1.6s; writing-mode: vertical-rl; font-size: 1.4rem; letter-spacing: 8px; }
+        #page-4.show-poems .poem-4 { top: auto; bottom: 25%; right: 8%; left: auto; transform: translate(0, 0) scale(1); opacity: 1; transition-delay: 2.0s; writing-mode: vertical-rl; font-size: 1.4rem; letter-spacing: 8px; color: #a1c4fd; text-shadow: 0 0 10px rgba(161,196,253,0.5); }
+
+        audio { display: none; }
+
+        /* ================= 移动端适配 ================= */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; letter-spacing: 2px; }
+            .page { padding: 20px 16px; }
+            .top-controls { top: 14px; right: 14px; gap: 10px; }
+            .icon-btn { width: 42px; height: 42px; font-size: 20px; }
+            .nav-bar { gap: 6px; padding: 8px 12px; bottom: 16px; }
+            .nav-btn { padding: 10px 14px; font-size: 0.85rem; }
+            
+            .page-1-deco { top: 4%; left: 6%; }
+            .page-1-deco h2 { font-size: 1.4rem; }
+            .page-1-deco p { font-size: 0.65rem; letter-spacing: 2px; }
+            .page-1-deco-right { bottom: 8%; right: 6%; }
+            .page-1-deco-right p { font-size: 0.9rem; }
+            .page-1-bg-text { font-size: 22vw; }
+            
+            .carousel { width: 220px; height: 320px; }
+            .carousel-item { padding: 10px 10px 72px 10px; border-radius: 12px; }
+            .carousel-caption { font-size: 0.85rem; line-height: 1.5; bottom: 16px; }
+            .carousel-btn { width: 42px; height: 42px; font-size: 18px; }
+            .btn-prev { left: 2%; }
+            .btn-next { right: 2%; }
+            
+            .envelope-wrapper { width: 92vw; height: 400px; margin-top: 0; }
+            .letter-paper { height: 340px; padding: 26px 22px; font-size: 0.9rem; line-height: 30px; letter-spacing: 1px; }
+            .envelope-wrapper.open .letter-paper { transform: translateY(-70px); }
+            .wax-seal { width: 66px; height: 66px; font-size: 26px; }
+            
+            .intro-text h2 { font-size: 1.5rem; letter-spacing: 4px; }
+            .intro-text p { font-size: 0.95rem; letter-spacing: 8px; }
+            .intro-text .en-text { font-size: 0.7rem; letter-spacing: 3px; }
+            .intro-text .deco-line { width: 120px; }
+            
+            .dual-compass-container { flex-direction: column; gap: 16px; }
+            .wrapper-2026,
+            .starry-surprise.show .wrapper-2026 { transform: translate(0, 0) scale(1) !important; }
+            .wrapper-2005,
+            .starry-surprise.show .wrapper-2005 { transform: translate(0, 0) scale(1) !important; }
+            .wrapper-2026 .cosmos-compass { width: 64vmin; height: 64vmin; max-width: 300px; max-height: 300px; }
+            .wrapper-2005 .cosmos-compass { width: 44vmin; height: 44vmin; max-width: 220px; max-height: 220px; }
+            .compass-title { font-size: 0.75rem; margin-bottom: 8px; padding-bottom: 3px; }
+            .wrapper-2026 .compass-title { font-size: 0.85rem; }
+            .location-info { margin-top: 8px; }
+            .loc-text { font-size: 0.65rem; }
+            
+            .art-text.text-1 { font-size: 1.1rem; top: 6%; left: 5%; }
+            .art-text.text-2 { font-size: 0.8rem; letter-spacing: 3px; bottom: 8%; left: 5%; }
+            
+            .core-photo-container { width: 100px; height: 130px; bottom: 6%; right: 4%; padding: 6px 6px 22px 6px; }
+            .core-photo-container p { font-size: 0.55rem; bottom: 4px; }
+            
+            .reset-surprise-btn { bottom: 74px; padding: 8px 16px; font-size: 0.8rem; }
+            
+            /* 回忆照片：手机只显示 mem-7 居中 */
+            .memory-img { display: none; }
+            .mem-7 {
+                display: block;
+                inset: 0; margin: auto;
+                width: 200px; height: 200px;
+                --rot: 3deg;
+            }
+            
+            .cake { font-size: 96px; }
+            .cute-doll { font-size: 40px; }
+            .doll-left { left: -50px; }
+            .doll-right { right: -50px; }
+            
+            .wish-text { font-size: 1.6rem; letter-spacing: 6px; }
+            .wish-text span { font-size: 1rem !important; letter-spacing: 3px !important; }
+            
+            .poetic-text { font-size: 0.85rem; letter-spacing: 3px; }
+            #page-4.show-poems .poem-1 { font-size: 0.9rem; letter-spacing: 3px; }
+            #page-4.show-poems .poem-2 { font-size: 0.8rem; letter-spacing: 2px; }
+            #page-4.show-poems .poem-3,
+            #page-4.show-poems .poem-4 { font-size: 0.9rem; letter-spacing: 4px; }
+        }
+
+        /* ================= 无障碍：减少动态效果 ================= */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <audio id="bgm" loop preload="auto" src="./media/music.mp3"></audio>
+    <audio id="voice-audio" src="./media/video.mp3"></audio>
+    
+        <div class="top-controls">
+        <!-- 👇 新增这一行：返回主页按钮 👇 -->
+        <div class="icon-btn" onclick="window.location.href='../root/root.html'" title="返回时光机">🏠</div>
+        
+        <!-- 原有的音乐按钮 -->
+        <div class="icon-btn" id="music-btn" onclick="toggleMusic()"><span class="music-icon">🎵</span></div>
+    </div>
+
+    <div class="page-container">
+        
+        <!-- 1. 3D 轮播照片墙 -->
+        <div class="page active" id="page-1">
+            <div class="page-1-bg-text">MEMORIES</div>
+            <div class="page-1-deco">
+                <h2>时光掠影</h2>
+                <p>MOMENTS IN TIME</p>
+                <p>感谢命运让我们在这诺大的时空长河中相遇</p>
+            </div>
+            <div class="page-1-deco-right">
+                <p>Every moment<br>is a beautiful memory.</p>
+            </div>
+
+            <div class="carousel-container" id="carousel-container">
+                <div class="carousel" id="carousel">
+                    <div class="carousel-item">
+                        <img src="imgs/112.jpg" alt="photo1">
+                        <div class="carousel-caption">那一抹朱砂红<br>惊艳了岁月的长河</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/113.jpg" alt="photo2">
+                        <div class="carousel-caption">红衣似火，眉眼如画<br>是这人间最明媚的色彩</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/114.jpg" alt="photo3">
+                        <div class="carousel-caption">衣袂翩跹，步步生莲<br>宛如从千年画卷中走来</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/115.jpg" alt="photo4">
+                        <div class="carousel-caption">不染尘埃，灼灼其华<br>岁月从不败绝色佳人</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/116.jpg" alt="photo5">
+                        <div class="carousel-caption">哪怕漫天星光<br>也不及你红衣加身的耀眼</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/117.jpg" alt="photo6">
+                        <div class="carousel-caption">巧笑倩兮，美目盼兮<br>一颦一笑皆是万种风情</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/118.jpg" alt="photo7">
+                        <div class="carousel-caption">红衣似火，眉眼如画<br>是这人间最明媚的色彩</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/119.jpg" alt="photo8">
+                        <div class="carousel-caption">衣袂翩跹，步步生莲<br>宛如从千年画卷中走来</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/120.jpg" alt="photo9">
+                        <div class="carousel-caption">明眸皓齿，朱砂红妆，是岁月里最惊艳的一笔。</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/121.jpg" alt="photo10">
+                        <div class="carousel-caption">桃之夭夭，灼灼其华，红衣映衬下，明艳不可方物。</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/122.jpg" alt="photo11">
+                        <div class="carousel-caption">着一袭红衣，展绝代风华，惊艳了时光。</div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="imgs/123.jpg" alt="photo12">
+                        <div class="carousel-caption">茫茫人海中，你这一身红衣，只需一眼，便是万年。</div>
+                    </div>
+                </div>
+                
+                <div class="carousel-btn btn-prev" onclick="prevSlide()">❮</div>
+                <div class="carousel-btn btn-next" onclick="nextSlide()">❯</div>
+                <div class="dots-container" id="dots-container"></div>
+            </div>
+        </div>
+
+        <!-- 2. 高定复古火漆信封 -->
+        <div class="page" id="page-2">
+            <div class="envelope-scene">
+                <div class="header" style="position: absolute; top: 5%; z-index: 2;"><h1>见字如面</h1></div>
+                
+                <div class="envelope-wrapper" id="envelope-wrapper" onclick="openEnvelope()">
+                    <div class="letter-paper">
+                        <span class="typewriter" id="typewriter-text"></span>
+                        <div class="voice-tip" id="voice-tip">🎙️ 正在播放专属语音...</div>
+                    </div>
+
+                    <div class="envelope-body"></div>
+                    <div class="envelope-front"></div>
+                    <div class="envelope-flap">
+                        <div class="wax-seal"></div>
+                    </div>
+                    <div class="stamp"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 惊喜盲盒 -->
+        <div id="intro-text" class="intro-text">
+            <span class="en-text">A GIFT FOR YOU</span>
+            <h2>接下来是送给藤藤的星空</h2>
+            <div class="deco-line"></div>
+            <p>请查收</p>
+        </div>
+
+        <div class="page" id="page-3">
+            <div class="header" id="gift-header"><h1>惊喜盲盒</h1></div>
+            
+            <!-- 3D 立体礼盒 -->
+            <div class="gift-box-wrapper" id="gift-wrapper">
+                <div class="gift-box" id="gift-box" onclick="openStarryGift()">
+                    <div class="box-3d">
+                        <div class="box-face face-front"></div>
+                        <div class="box-face face-back"></div>
+                        <div class="box-face face-right"></div>
+                        <div class="box-face face-left"></div>
+                        <div class="box-face face-top"></div>
+                        <div class="box-face face-bottom"></div>
+                        <div class="ribbon ribbon-v"></div>
+                        <div class="ribbon ribbon-h"></div>
+                        <div class="bow">🎀</div>
+                    </div>
+                    <div class="gift-text">
+                        <span>Click to Open</span>
+                        <span>点击拆开</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 打开后的星空显示 -->
+            <div class="starry-surprise" id="starry-surprise">
+                <canvas id="bg-stars-surprise"></canvas>
+                <div class="aurora-glow"></div>
+
+                <div class="dual-compass-container">
+                    <div class="compass-wrapper wrapper-2026">
+                        <div class="compass-title">2026 · 农历九月廿五 · 廊坊</div>
+                        <div class="cosmos-compass">
+                            <img class="star-trail-bg" src="imgs/star_trail_langfang.png" alt="廊坊星轨">
+                            <canvas class="sky-map-canvas" id="sky-map-langfang"></canvas>
+                            <div class="compass-ring"></div>
+                            <div class="compass-text n">N</div><div class="compass-text s">S</div>
+                            <div class="compass-text e">E</div><div class="compass-text w">W</div>
+                        </div>
+                        <div class="location-info">
+                            <span class="loc-line"></span><span class="loc-text">39.53°N · 真实的星空见证</span><span class="loc-line"></span>
+                        </div>
+                    </div>
+
+                    <div class="compass-wrapper wrapper-2005">
+                        <div class="compass-title">2005 · 农历九月廿五 · 菏泽</div>
+                        <div class="cosmos-compass">
+                            <img class="star-trail-bg" src="imgs/star_trail_langfang.png" alt="菏泽星轨">
+                            <canvas class="sky-map-canvas" id="sky-map-heze"></canvas>
+                            <div class="compass-ring"></div>
+                            <div class="compass-text n">N</div><div class="compass-text s">S</div>
+                            <div class="compass-text e">E</div><div class="compass-text w">W</div>
+                        </div>
+                        <div class="location-info">
+                            <span class="loc-line"></span><span class="loc-text">35.23°N · 生命最初的星空</span><span class="loc-line"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="art-text-container">
+                    <div class="art-text text-1">From your first<br>starry night<br>to this moment.</div>
+                    <div class="art-text text-2">HAPPY BIRTHDAY 2026</div>
+                </div>
+
+                <div class="core-photo-container">
+                    <img class="core-photo" src="imgs/star_trail_lunar.png" alt="独属于小藤子的星轨">
+                    <p>这是大萍子送给独属于小藤子的星轨</p>
+                </div>
+            </div>
+            
+            <div class="reset-surprise-btn" onclick="resetGift()">再拆一次盲盒</div>
+        </div>
+
+        <!-- 4. 许愿池 -->
+        <div class="page" id="page-4">
+            <!-- 🌟 背景星图 / 星轨轮播 -->
+            <div class="wish-bg-slideshow" id="wish-bg-slideshow">
+                <div class="wish-bg-slide" style="background-image: url('imgs/star_trail_lunar.png');"></div>
+                
+            </div>
+
+            <canvas id="wish-canvas"></canvas>
+            
+            <div class="poetic-text poem-1">红衣揽星河，惊鸿照影来。</div>
+            <div class="poetic-text poem-2">岁岁常欢愉，万事皆胜意。</div>
+            <div class="poetic-text poem-3">明眸皓齿<br>惊艳时光</div>
+            <div class="poetic-text poem-4">愿你如星<br>璀璨自由</div>
+
+            <div class="memory-photos-container" id="memory-container">
+                <img class="memory-img mem-1" src="imgs/116.jpg" alt="回忆1">
+                <img class="memory-img mem-2" src="imgs/star_trail_langfang.png" alt="回忆2">
+                <img class="memory-img mem-3" src="imgs/120.jpg" alt="回忆3">
+                <img class="memory-img mem-4" src="imgs/123.jpg" alt="回忆4">
+                <img class="memory-img mem-5" src="imgs/star_trail_lunar.png" alt="回忆5">
+                <img class="memory-img mem-6" src="imgs/121.jpg" alt="回忆6">
+                <img class="memory-img mem-7" src="imgs/sky_map_langfang.png" alt="回忆7">
+            </div>
+
+            <div class="header" style="z-index: 10; pointer-events: none; margin-top: 20px;"><h1>星空许愿池</h1></div>
+            
+            <div class="cake-scene" id="cake-scene">
+                <div class="click-hint">
+                    <span>轻触蛋糕，许下心愿</span>
+                    <span class="arrow">👇</span>
+                </div>
+                <div class="cute-doll doll-left">🧸</div>
+                <div class="cake" id="cake" onclick="blowCandle()">🎂</div>
+                <div class="cute-doll doll-right">🐰</div>
+            </div>
+
+            <div class="wish-text" id="wish-text">愿望已传达到星空<br><span style="font-size:1.8rem; letter-spacing:6px; color:#a1c4fd; font-weight:400;">Wish granted</span></div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-btn active" onclick="switchPage(1)">📸 照片</div>
+        <div class="nav-btn" onclick="switchPage(2)">✉️ 信件</div>
+        <div class="nav-btn" onclick="switchPage(3)">🎁 盲盒</div>
+        <div class="nav-btn" onclick="switchPage(4)">🌌 许愿</div>
+    </div>
+
+    <script>
+        /* ================= 全局状态 ================= */
+        const state = {
+            envelopeOpened: false,
+            giftOpened: false,
+            starryShown: false,
+            wishBlown: false
+        };
+
+        /* ================= 1. 3D 轮播逻辑 ================= */
+        const carouselItems = document.querySelectorAll('.carousel-item');
+        const dotsContainer = document.getElementById('dots-container');
+        let currentIndex = 0;
+        const totalItems = carouselItems.length;
+        const dots = [];
+        let autoPlayInterval = null;
+
+        for (let i = 0; i < totalItems; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => { currentIndex = i; updateCarousel(); resetAutoPlay(); });
+            dotsContainer.appendChild(dot);
+            dots.push(dot);
+        }
+
+        function updateCarousel() {
+            carouselItems.forEach((item, index) => {
+                let offset = index - currentIndex;
+                if (offset < -Math.floor(totalItems / 2)) offset += totalItems;
+                if (offset > Math.floor(totalItems / 2)) offset -= totalItems;
+                const absOffset = Math.abs(offset);
+
+                item.style.transform = `translateX(${offset * 65}%) translateZ(${-absOffset * 200}px) rotateY(${offset * -25}deg) scale(${1 - absOffset * 0.08})`;
+                item.style.zIndex = totalItems - absOffset;
+                item.style.opacity = absOffset > 2 ? 0 : 1 - absOffset * 0.3;
+                item.style.filter = `blur(${absOffset * 1.5}px) brightness(${1 - absOffset * 0.15})`;
+                if (offset === 0) item.classList.add('active'); else item.classList.remove('active');
+            });
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+        }
+
+        function prevSlide() { currentIndex = (currentIndex - 1 + totalItems) % totalItems; updateCarousel(); resetAutoPlay(); }
+        function nextSlide() { currentIndex = (currentIndex + 1) % totalItems; updateCarousel(); resetAutoPlay(); }
+        
+        function startAutoPlay() { 
+            if (autoPlayInterval) clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => { currentIndex = (currentIndex + 1) % totalItems; updateCarousel(); }, 4000); 
+        }
+        function resetAutoPlay() { clearInterval(autoPlayInterval); startAutoPlay(); }
+
+        updateCarousel();
+        startAutoPlay(); 
+
+               /* ================= 2. 音乐控制（点击任意位置播放，循环） ================= */
+        const bgm = document.getElementById('bgm');
+        const musicBtn = document.getElementById('music-btn');
+        let isPlaying = false;
+        let userPaused = false;   // 用户是否手动暂停过
+
+        // 尝试播放：已播放或用户主动暂停过，就不再自动播放
+        function tryPlayBgm() {
+            if (isPlaying || userPaused) return;
+            bgm.play().then(() => {
+                isPlaying = true;
+                musicBtn.classList.add('playing');
+            }).catch(() => {
+                // 音频还没就绪或被拦截，下次点击会再试
+            });
+        }
+
+        // 捕获阶段监听，确保点击任何位置都能触发（排除音乐按钮本身）
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#music-btn')) return;
+            tryPlayBgm();
+        }, true);
+
+        // 移动端触摸也触发一次，响应更快
+        document.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#music-btn')) return;
+            tryPlayBgm();
+        }, { capture: true, passive: true });
+
+        function toggleMusic(event) {
+            if (event) event.stopPropagation();
+            if (isPlaying) {
+                bgm.pause();
+                musicBtn.classList.remove('playing');
+                isPlaying = false;
+                userPaused = true;    // 用户主动暂停后，其他点击不再强制恢复
+            } else {
+                userPaused = false;
+                bgm.play().then(() => {
+                    isPlaying = true;
+                    musicBtn.classList.add('playing');
+                }).catch(() => {});
+            }
+        }
+
+        /* ================= 3. 信封：打字机 + 语音（可续播） ================= */
+        const fullText = "亲爱的女孩：\n\n生日快乐。\n\n翻看照片，你一袭红衣汉服的模样，真真切切地惊艳了我。朱砂红裙，眉目如画，像是从千古时光里走出的绝代佳人。\n\n很高兴能在浩瀚的宇宙里，陪你走过一年又一年。今年，我用代码为你造了一片星空，把它当作礼物送给你。\n\n愿你未来的日子，如这红衣般热烈鲜活，如这星空般璀璨自由。生日快乐！";
+        const voiceAudio = document.getElementById('voice-audio');
+        const voiceTip = document.getElementById('voice-tip');
+        const typewriterEl = document.getElementById('typewriter-text');
+
+        let typeIndex = 0;
+        let typeInterval = null;
+
+        voiceAudio.addEventListener('play', () => {
+            voiceTip.textContent = '🎙️ 正在播放专属语音...';
+            voiceTip.classList.add('show');
+            bgm.volume = 0.3;
+        });
+        voiceAudio.addEventListener('pause', () => {
+            if (!voiceAudio.ended) voiceTip.classList.remove('show');
+            bgm.volume = 1;
+        });
+        voiceAudio.addEventListener('ended', () => {
+            voiceTip.classList.remove('show');
+            bgm.volume = 1;
+        });
+
+        function startTypewriterAndVoice() {
+            typewriterEl.textContent = '';
+            typeIndex = 0;
+            clearInterval(typeInterval);
+
+            try { voiceAudio.currentTime = 0; } catch (e) {}
+            voiceAudio.play().catch(() => {
+                voiceTip.textContent = '🔇 语音加载失败，请阅读文字';
+                voiceTip.classList.add('show');
+            });
+
+            typeInterval = setInterval(() => {
+                if (typeIndex < fullText.length) {
+                    typewriterEl.textContent += fullText.charAt(typeIndex);
+                    typeIndex++;
+                } else {
+                    clearInterval(typeInterval);
+                    typeInterval = null;
+                }
+            }, 120);
+        }
+
+        function resumeEnvelope() {
+            const voiceDuration = voiceAudio.duration;
+            const voiceDone = voiceAudio.ended || !!voiceAudio.error ||
+                (isFinite(voiceDuration) && voiceDuration > 0 && voiceAudio.currentTime >= voiceDuration - 0.2);
+            const textDone = typeIndex >= fullText.length;
+
+            if (voiceDone && textDone) return;
+
+            if (!voiceDone) {
+                voiceAudio.play().catch(() => {
+                    voiceTip.textContent = '🔇 语音加载失败，请阅读文字';
+                    voiceTip.classList.add('show');
+                });
+            }
+
+            if (!textDone) {
+                clearInterval(typeInterval);
+                typeInterval = setInterval(() => {
+                    if (typeIndex < fullText.length) {
+                        typewriterEl.textContent += fullText.charAt(typeIndex);
+                        typeIndex++;
+                    } else {
+                        clearInterval(typeInterval);
+                        typeInterval = null;
+                    }
+                }, 120);
+            }
+        }
+
+        function openEnvelope() {
+            if (state.envelopeOpened) return;
+            state.envelopeOpened = true;
+
+            const wrapper = document.getElementById('envelope-wrapper');
+            wrapper.classList.add('open');
+
+            tryPlayBgm();
+
+            setTimeout(() => {
+                if (!document.getElementById('page-2').classList.contains('active')) return;
+                startTypewriterAndVoice();
+            }, 800);
+        }
+
+        /* ================= 4. 页面切换（状态保持 + 续播） ================= */
+        function switchPage(index) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`page-${index}`).classList.add('active');
+            document.querySelectorAll('.nav-btn')[index - 1].classList.add('active');
+
+            /* 深色模式联动 */
+            if (index === 1 || index === 2) {
+                document.body.classList.remove('night-mode');
+            } else if (index === 3) {
+                if (state.giftOpened) document.body.classList.add('night-mode');
+                else document.body.classList.remove('night-mode');
+            } else if (index === 4) {
+                if (state.wishBlown) document.body.classList.add('night-mode');
+                else document.body.classList.remove('night-mode');
+            }
+
+            /* --- 页面 1：轮播 --- */
+            if (index === 1) {
+                startAutoPlay();
+            } else {
+                if (autoPlayInterval) { clearInterval(autoPlayInterval); autoPlayInterval = null; }
+            }
+
+            /* --- 页面 2：信封 / 语音 --- */
+            if (index === 2) {
+                if (state.envelopeOpened) resumeEnvelope();
+            } else {
+                voiceAudio.pause();
+                voiceTip.classList.remove('show');
+                clearInterval(typeInterval);
+                typeInterval = null;
+            }
+
+            /* --- 页面 3：盲盒 / 星空 --- */
+            if (index === 3) {
+                if (state.giftOpened) restoreStarryScene();
+            } else {
+                const introText = document.getElementById('intro-text');
+                introText.classList.remove('show');
+                if (state.starryShown) introText.style.display = 'none';
+
+                if (skyAnimationIdLangfang) { cancelAnimationFrame(skyAnimationIdLangfang); skyAnimationIdLangfang = null; }
+                if (skyAnimationIdHeze) { cancelAnimationFrame(skyAnimationIdHeze); skyAnimationIdHeze = null; }
+                if (bgStarAnimationId) { cancelAnimationFrame(bgStarAnimationId); bgStarAnimationId = null; }
+            }
+
+            /* --- 页面 4：许愿池 --- */
+            if (index === 4) {
+                startWishBgSlideshow();
+                if (state.wishBlown) {
+                    document.body.classList.add('night-mode');
+                    startMemorySlideshow();
+                }
+            } else {
+                stopWishBgSlideshow();
+                if (window.memoryInterval) { clearInterval(window.memoryInterval); window.memoryInterval = null; }
+            }
+        }
+
+        /* ================= 5. 缓缓飘落的星与花（带景深分层） ================= */
+        function createFallingStarsAndFlowers() {
+            const symbols = ['✨', '🌟', '🌸', '🌸', '💮', '✧', '⭐'];
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'falling-element';
+                    el.innerText = symbols[Math.floor(Math.random() * symbols.length)];
+
+                    const z = Math.floor(Math.random() * 5);
+                    el.style.zIndex = z;
+                    el.style.left = `${Math.random() * 100}vw`;
+
+                    if (z >= 3) {
+                        el.style.fontSize = `${Math.random() * 22 + 14}px`;
+                        el.style.filter += ' blur(1.5px)';
+                    } else {
+                        el.style.fontSize = `${Math.random() * 14 + 8}px`;
+                    }
+
+                    const duration = Math.random() * 6 + 6;
+                    el.style.animationDuration = `${duration}s`;
+
+                    if (el.innerText.includes('🌸') || el.innerText.includes('💮')) {
+                        el.style.filter = `drop-shadow(0 0 10px rgba(255, 182, 193, 0.8)) drop-shadow(0 0 20px rgba(255, 105, 180, 0.4))` + (z >= 3 ? ' blur(1.5px)' : '');
+                    } else {
+                        el.style.filter = `drop-shadow(0 0 10px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 20px rgba(161, 196, 253, 0.6))` + (z >= 3 ? ' blur(1.5px)' : '');
+                    }
+
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), (duration + 1) * 1000);
+                }, i * 200); 
+            }
+        }
+
+        /* ================= 6. 星空盲盒 ================= */
+        let skyAnimationIdLangfang = null, skyAnimationIdHeze = null, bgStarAnimationId = null;
+        const bgStarsSurprise = document.getElementById('bg-stars-surprise');
+        const bgStarsSurpriseCtx = bgStarsSurprise.getContext('2d');
+        let surpriseBgStars = [];
+        let surpriseBgMeteors = [];
+
+        function openStarryGift() {
+            if (state.giftOpened) return;
+            state.giftOpened = true;
+
+            document.getElementById('gift-wrapper').classList.add('opened');
+            document.getElementById('gift-header').style.opacity = '0';
+            document.body.classList.add('night-mode');
+
+            setTimeout(() => {
+                if (!document.getElementById('page-3').classList.contains('active')) {
+                    showStarryScene();
+                    return;
+                }
+                const introText = document.getElementById('intro-text');
+                introText.style.display = 'flex';
+                introText.classList.add('show');
+
+                setTimeout(() => {
+                    introText.classList.remove('show');
+                    setTimeout(() => {
+                        introText.style.display = 'none';
+                        showStarryScene();
+                    }, 1500);
+                }, 3000);
+            }, 500);
+        }
+
+        function showStarryScene() {
+            document.getElementById('starry-surprise').classList.add('show');
+
+            if (state.starryShown) {
+                startStarryAnimations();
+                return;
+            }
+            state.starryShown = true;
+
+            setTimeout(() => {
+                startStarryAnimations();
+                createFallingStarsAndFlowers();
+                setTimeout(() => {
+                    createFirework(window.innerWidth * 0.3, window.innerHeight * 0.4);
+                    createFirework(window.innerWidth * 0.7, window.innerHeight * 0.4);
+                }, 2000);
+            }, 100);
+        }
+
+        function startStarryAnimations() {
+            if (skyAnimationIdLangfang) { cancelAnimationFrame(skyAnimationIdLangfang); skyAnimationIdLangfang = null; }
+            if (skyAnimationIdHeze) { cancelAnimationFrame(skyAnimationIdHeze); skyAnimationIdHeze = null; }
+            if (bgStarAnimationId) { cancelAnimationFrame(bgStarAnimationId); bgStarAnimationId = null; }
+
+            initBgStarsSurprise();
+            initSkyMap('sky-map-langfang', 'langfang');
+            initSkyMap('sky-map-heze', 'heze');
+            drawSkyMap('sky-map-langfang', 'langfang');
+            drawSkyMap('sky-map-heze', 'heze');
+            drawBgStarsSurprise();
+        }
+
+        function restoreStarryScene() {
+            document.body.classList.add('night-mode');
+            document.getElementById('gift-wrapper').classList.add('opened');
+            document.getElementById('gift-header').style.opacity = '0';
+
+            const introText = document.getElementById('intro-text');
+            introText.classList.remove('show');
+            introText.style.display = 'none';
+
+            showStarryScene();
+        }
+
+        function resetGift() {
+            state.giftOpened = false;
+            state.starryShown = false;
+
+            document.getElementById('starry-surprise').classList.remove('show');
+            if (skyAnimationIdLangfang) { cancelAnimationFrame(skyAnimationIdLangfang); skyAnimationIdLangfang = null; }
+            if (skyAnimationIdHeze) { cancelAnimationFrame(skyAnimationIdHeze); skyAnimationIdHeze = null; }
+            if (bgStarAnimationId) { cancelAnimationFrame(bgStarAnimationId); bgStarAnimationId = null; }
+
+            const introText = document.getElementById('intro-text');
+            introText.classList.remove('show');
+            introText.style.display = 'flex';
+
+            setTimeout(() => {
+                document.getElementById('gift-wrapper').classList.remove('opened');
+                document.getElementById('gift-header').style.opacity = '1';
+                if (!state.wishBlown) document.body.classList.remove('night-mode');
+            }, 800);
+        }
+
+        function initBgStarsSurprise() {
+            bgStarsSurprise.width = window.innerWidth;
+            bgStarsSurprise.height = window.innerHeight;
+            surpriseBgStars = [];
+            surpriseBgMeteors = [];
+            for (let i = 0; i < 220; i++) { 
+                surpriseBgStars.push({
+                    x: Math.random() * bgStarsSurprise.width,
+                    y: Math.random() * bgStarsSurprise.height,
+                    r: Math.random() * 1.5 + 0.2, 
+                    alpha: Math.random() * 0.5 + 0.1,
+                    speed: Math.random() * 0.02 + 0.002,
+                    color: Math.random() > 0.8 ? (Math.random() > 0.5 ? '200, 220, 255' : '255, 200, 255') : '255, 255, 255'
+                });
+            }
+        }
+
+        function drawBgStarsSurprise() {
+            if (document.hidden) {
+                bgStarAnimationId = requestAnimationFrame(drawBgStarsSurprise);
+                return;
+            }
+            bgStarsSurpriseCtx.clearRect(0, 0, bgStarsSurprise.width, bgStarsSurprise.height);
+            
+            surpriseBgStars.forEach(s => {
+                s.alpha += s.speed;
+                if (s.alpha > 1 || s.alpha < 0.1) s.speed = -s.speed;
+                bgStarsSurpriseCtx.beginPath();
+                bgStarsSurpriseCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                bgStarsSurpriseCtx.fillStyle = `rgba(${s.color}, ${s.alpha})`;
+                bgStarsSurpriseCtx.fill();
+            });
+
+            if (Math.random() < 0.02) {
+                surpriseBgMeteors.push({
+                    x: Math.random() * bgStarsSurprise.width + 300, y: -100 - Math.random() * 200,
+                    length: Math.random() * 200 + 150, speed: Math.random() * 15 + 10,
+                    angle: Math.PI / 3.5 + Math.random() * 0.2, alpha: 1, size: Math.random() * 2 + 1
+                });
+            }
+
+            for (let i = surpriseBgMeteors.length - 1; i >= 0; i--) {
+                let m = surpriseBgMeteors[i];
+                m.x -= Math.cos(m.angle) * m.speed; m.y += Math.sin(m.angle) * m.speed; m.alpha -= 0.015;
+                if (m.y > bgStarsSurprise.height || m.x < -m.length || m.alpha <= 0) { surpriseBgMeteors.splice(i, 1); continue; }
+                bgStarsSurpriseCtx.beginPath();
+                let endX = m.x + Math.cos(m.angle) * m.length; let endY = m.y - Math.sin(m.angle) * m.length;
+                let gradient = bgStarsSurpriseCtx.createLinearGradient(m.x, m.y, endX, endY);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${m.alpha})`);
+                gradient.addColorStop(0.2, `rgba(180, 210, 255, ${m.alpha * 0.8})`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                bgStarsSurpriseCtx.strokeStyle = gradient; bgStarsSurpriseCtx.lineWidth = m.size;
+                bgStarsSurpriseCtx.lineCap = 'round'; bgStarsSurpriseCtx.moveTo(m.x, m.y); bgStarsSurpriseCtx.lineTo(endX, endY); bgStarsSurpriseCtx.stroke();
+            }
+            bgStarAnimationId = requestAnimationFrame(drawBgStarsSurprise);
+        }
+
+        const skyData = {};
+        function initSkyMap(canvasId, type) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const compass = canvas.parentElement;
+            canvas.width = compass.clientWidth;
+            canvas.height = compass.clientHeight;
+
+            const stars = [];
+            for (let i = 0; i < 140; i++) { 
+                stars.push({
+                    x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.3, alpha: Math.random(), speed: Math.random() * 0.02 + 0.005
+                });
+            }
+            skyData[canvasId] = { canvas, ctx, stars, meteors: [], animationId: null, type };
+        }
+
+        function drawSkyMap(canvasId, type) {
+            const data = skyData[canvasId];
+            if (!data) return;
+            const { canvas, ctx, stars, meteors } = data;
+
+            if (document.hidden) {
+                data.animationId = requestAnimationFrame(() => drawSkyMap(canvasId, type));
+                if (type === 'langfang') skyAnimationIdLangfang = data.animationId;
+                else skyAnimationIdHeze = data.animationId;
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const maxRadius = Math.min(centerX, centerY) * 0.95;
+
+            let constellations = [];
+            if (type === 'langfang') {
+                constellations = [
+                    [{x:0.35, y:0.4}, {x:0.5, y:0.35}, {x:0.55, y:0.5}, {x:0.4, y:0.55}, {x:0.35, y:0.4}],
+                    [{x:0.6, y:0.2}, {x:0.65, y:0.3}, {x:0.7, y:0.25}, {x:0.75, y:0.35}, {x:0.8, y:0.3}],
+                    [{x:0.3, y:0.7}, {x:0.35, y:0.75}, {x:0.4, y:0.73}, {x:0.45, y:0.7}, {x:0.5, y:0.65}, {x:0.52, y:0.55}, {x:0.45, y:0.55}]
+                ];
+            } else {
+                constellations = [
+                    [{x:0.4, y:0.3}, {x:0.5, y:0.35}, {x:0.6, y:0.3}, {x:0.6, y:0.6}, {x:0.5, y:0.7}, {x:0.4, y:0.6}, {x:0.4, y:0.3}],
+                    [{x:0.2, y:0.5}, {x:0.25, y:0.55}, {x:0.3, y:0.5}, {x:0.35, y:0.6}],
+                    [{x:0.7, y:0.4}, {x:0.75, y:0.45}, {x:0.8, y:0.4}, {x:0.85, y:0.5}]
+                ];
+            }
+
+            /* 星座线：加粗 + 发光，颜色随类型切换 */
+            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = type === 'langfang' ? 'rgba(161, 196, 253, 0.45)' : 'rgba(251, 194, 235, 0.45)';
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = type === 'langfang' ? '#a1c4fd' : '#fbc2eb';
+            constellations.forEach(constellation => {
+                ctx.beginPath();
+                constellation.forEach((star, i) => {
+                    const x = centerX + (star.x - 0.5) * maxRadius * 2;
+                    const y = centerY + (star.y - 0.5) * maxRadius * 2;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+            });
+            ctx.shadowBlur = 0;
+
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0.1) star.speed = -star.speed;
+                ctx.beginPath(); ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                if (star.radius > 1.2) { 
+                    ctx.shadowBlur = 8; ctx.shadowColor = type === 'langfang' ? '#a1c4fd' : '#fbc2eb'; 
+                    ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`; ctx.fill();
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${star.alpha * 0.6})`; ctx.lineWidth = 0.5;
+                    ctx.beginPath(); ctx.moveTo(star.x - star.radius * 3, star.y); ctx.lineTo(star.x + star.radius * 3, star.y);
+                    ctx.moveTo(star.x, star.y - star.radius * 3); ctx.lineTo(star.x, star.y + star.radius * 3); ctx.stroke();
+                } else { 
+                    ctx.shadowBlur = 0; ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`; ctx.fill();
+                }
+            });
+            ctx.shadowBlur = 0; 
+
+            if (Math.random() < 0.015) {
+                meteors.push({ x: Math.random() * canvas.width + 100, y: -50 - Math.random() * 100, length: Math.random() * 100 + 50, speed: Math.random() * 8 + 6, angle: Math.PI / 4, alpha: 1 });
+            }
+            for (let i = meteors.length - 1; i >= 0; i--) {
+                let m = meteors[i];
+                m.x -= Math.cos(m.angle) * m.speed; m.y += Math.sin(m.angle) * m.speed; m.alpha -= 0.02;
+                if (m.y > canvas.height || m.x < -m.length || m.alpha <= 0) { meteors.splice(i, 1); continue; }
+                ctx.beginPath();
+                let endX = m.x + Math.cos(m.angle) * m.length; let endY = m.y - Math.sin(m.angle) * m.length;
+                let gradient = ctx.createLinearGradient(m.x, m.y, endX, endY);
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${m.alpha})`); gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.strokeStyle = gradient; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.moveTo(m.x, m.y); ctx.lineTo(endX, endY); ctx.stroke();
+            }
+
+            data.animationId = requestAnimationFrame(() => drawSkyMap(canvasId, type));
+            if (type === 'langfang') skyAnimationIdLangfang = data.animationId;
+            else skyAnimationIdHeze = data.animationId;
+        }
+
+        /* ================= 7. 许愿池 ================= */
+        function blowCandle() {
+            if (state.wishBlown) return;
+            state.wishBlown = true;
+
+            document.getElementById('cake-scene').classList.add('blown'); 
+            document.body.classList.add('night-mode');
+            document.getElementById('page-4').classList.add('show-poems');
+            
+            setTimeout(() => {
+                document.getElementById('wish-text').classList.add('show');
+                createFirework(window.innerWidth / 2, window.innerHeight / 2);
+                setTimeout(() => { 
+                    createFirework(window.innerWidth * 0.3, window.innerHeight * 0.3); 
+                    createFirework(window.innerWidth * 0.7, window.innerHeight * 0.3); 
+                }, 500);
+                setTimeout(startMemorySlideshow, 2000);
+            }, 800);
+        }
+
+        let memoryIndex = 0;
+        function showMemoryAt(i) {
+            const images = document.querySelectorAll('.memory-img');
+            if (!images.length) return;
+            images.forEach(img => img.classList.remove('show'));
+            setTimeout(() => {
+                const target = images[i];
+                if (!target) return;
+                target.classList.add('show');
+                const rect = target.getBoundingClientRect();
+                createFirework(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            }, 600);
+        }
+
+        function startMemorySlideshow() {
+            const images = document.querySelectorAll('.memory-img');
+            if (!images.length) return;
+            if (window.memoryInterval) clearInterval(window.memoryInterval);
+            showMemoryAt(memoryIndex);
+            window.memoryInterval = setInterval(() => {
+                memoryIndex = (memoryIndex + 1) % images.length;
+                showMemoryAt(memoryIndex);
+            }, 5000);
+        }
+
+        /* ===== 页面 4 背景星图 / 星轨轮播 ===== */
+        let wishBgSlides = [];
+        let wishBgIndex = 0;
+        let wishBgTimer = null;
+
+        function initWishBg() {
+            wishBgSlides = Array.from(document.querySelectorAll('.wish-bg-slide'));
+            if (wishBgSlides.length) {
+                wishBgSlides[0].classList.add('active');
+                wishBgIndex = 0;
+            }
+        }
+
+        function startWishBgSlideshow() {
+            if (!wishBgSlides.length) return;
+            if (wishBgTimer) clearInterval(wishBgTimer);
+            wishBgTimer = setInterval(() => {
+                if (!document.getElementById('page-4').classList.contains('active')) return;
+                wishBgSlides[wishBgIndex].classList.remove('active');
+                wishBgIndex = (wishBgIndex + 1) % wishBgSlides.length;
+                wishBgSlides[wishBgIndex].classList.add('active');
+            }, 4500);
+        }
+
+        function stopWishBgSlideshow() {
+            if (wishBgTimer) { clearInterval(wishBgTimer); wishBgTimer = null; }
+        }
+
+        /* ================= 8. 白天金色星尘与烟花 ================= */
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let bgParticles = [];
+
+        function resizeBg() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeBg);
+        resizeBg();
+
+        class BgParticle {
+            constructor() { this.reset(); this.y = Math.random() * bgCanvas.height; }
+            reset() { this.x = Math.random() * bgCanvas.width; this.y = -10; this.size = Math.random() * 3 + 1; this.speedY = Math.random() * 0.8 + 0.3; this.opacity = Math.random() * 0.6 + 0.2; }
+            update() { this.y += this.speedY; if (this.y > bgCanvas.height + 10) this.reset(); }
+            draw() { bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fillStyle = `rgba(255, 230, 150, ${this.opacity})`; bgCtx.fill(); }
+        }
+        for (let i = 0; i < 80; i++) bgParticles.push(new BgParticle());
+
+        function animateBg() {
+            if (!document.hidden) {
+                bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+                bgParticles.forEach(p => { p.update(); p.draw(); });
+            }
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        const wishCanvas = document.getElementById('wish-canvas');
+        const wishCtx = wishCanvas.getContext('2d');
+        let wWidth, wHeight, fireworks = [];
+
+        function resizeWish() { wWidth = wishCanvas.width = window.innerWidth; wHeight = wishCanvas.height = window.innerHeight; }
+        resizeWish();
+
+        window.addEventListener('resize', () => {
+            if (state.starryShown) initBgStarsSurprise();
+            resizeBg();
+            resizeWish();
+        });
+
+        class FireworkParticle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                let angle = Math.random() * Math.PI * 2;
+                let speed = Math.random() * 8 + 2;
+                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+                this.alpha = 1; this.decay = Math.random() * 0.02 + 0.015;
+                this.gravity = 0.05; this.size = Math.random() * 3 + 1;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.vy += this.gravity; this.vx *= 0.98; this.vy *= 0.98; this.alpha -= this.decay; }
+            draw() {
+                wishCtx.beginPath(); wishCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                wishCtx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+                wishCtx.shadowBlur = 10; wishCtx.shadowColor = `rgba(${this.color}, ${this.alpha})`;
+                wishCtx.fill(); wishCtx.shadowBlur = 0;
+            }
+        }
+
+        function createFirework(x, y) {
+            if (fireworks.length > 600) return;
+            /* 柔光色系：糖果粉 / 暖橙 / 天青 / 薰衣草 / 奶油金 */
+            const colors = ['255, 183, 197', '255, 223, 186', '186, 225, 255', '221, 214, 255', '255, 236, 179'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 80; i++) fireworks.push(new FireworkParticle(x, y, color));
+        }
+
+        function initWishSky() {
+            function render() {
+                if (!document.hidden) {
+                    wishCtx.clearRect(0, 0, wWidth, wHeight);
+                    for (let i = fireworks.length - 1; i >= 0; i--) {
+                        fireworks[i].update(); fireworks[i].draw();
+                        if (fireworks[i].alpha <= 0) fireworks.splice(i, 1);
+                    }
+                }
+                requestAnimationFrame(render);
+            }
+            render();
+        }
+        initWishSky();
+
+        wishCanvas.addEventListener('click', (e) => { createFirework(e.clientX, e.clientY); });
+
+        /* ================= 初始化 ================= */
+        initWishBg();
+    </script>
+</body>
+</html>

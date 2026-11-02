@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日快乐！</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+            /* 返回主页悬浮按钮样式 */
+    .back-home-btn {
+        position: fixed;
+        top: 30px;
+        right: 30px; /* 放在右上角，如果和原有内容冲突可以改为 left: 30px; */
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 30px;
+        color: #d44666; /* 字体颜色 */
+        text-decoration: none;
+        font-weight: bold;
+        font-family: 'Microsoft YaHei', sans-serif;
+        font-size: 1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        z-index: 9999; /* 保证在最上层 */
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .back-home-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        background: #ffffff;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #4a6bff;
+            --secondary-blue: #6c8eff;
+            --accent-yellow: #ffd166;
+            --accent-purple: #a855f7;
+            --dark-blue: #3a4fcc;
+            --light-bg: rgba(255, 255, 255, 0.15);
+            --future-orange: #ff9a3c;
+            --future-yellow: #ffcc00;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 50%, var(--dark-blue) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #fff;
+            position: relative;
+        }
+        
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, var(--accent-yellow), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--accent-yellow), transparent);
+        }
+        
+        
+.home-cake {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.home-cake:hover {
+    transform: scale(1.15) rotate(5deg); /* 轻微旋转增加灵动性 */
+    filter: drop-shadow(0 5px 8px rgba(255, 99, 71, 0.3)); /* hover时增强阴影 */
+}
+
+/* 蛋糕底座（双层设计） */
+.cake-base {
+    position: absolute;
+    bottom: 0;
+    width: 50px;
+    height: 30px;
+    background: linear-gradient(135deg, #f90168, #e90fed 70%, #c71585);
+    border-radius: 5px 5px 0 0;
+    box-shadow: 0 3px 0 rgba(150, 0, 80, 0.2) inset, /* 内部阴影增强层次 */
+                0 4px 6px rgba(0, 0, 0, 0.1); /* 外部阴影增加立体感 */
+}
+
+/* 底座装饰线 */
+.cake-base::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 顶层奶油 */
+.cake-top-mini {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 55px;
+    height: 15px;
+    background: linear-gradient(135deg, #ffeb3b, #ff9800);
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 奶油花纹 */
+.cake-top-mini::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 40% 60% 70% 30%;
+    box-shadow: 15px 0 rgba(255, 255, 255, 0.3), 
+                30px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* 蜡烛 */
+.candle-mini {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 20px;
+    background: linear-gradient(90deg, #ff7e5f, #ffffff 45%, #ffffff 55%, #ea6d0d);
+    border-radius: 2px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 蜡烛顶部金属片 */
+.candle-mini::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -2px;
+    width: 9px;
+    height: 3px;
+    background: linear-gradient(90deg, #c0c0c0, #ffffff, #c0c0c0);
+    border-radius: 1px;
+}
+
+
+.flame-mini {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 12px;
+    background: linear-gradient(to bottom, #ffffff 10%, #ffef00 40%, #ff6d00 80%, #ef0212);
+    border-radius: 50% 50% 20% 20%;
+    box-shadow: 0 0 8px #ffef00, 0 0 12px rgba(255, 110, 0, 0.5);
+    animation: flame-flicker 0.8s infinite alternate; /* 更快的闪烁频率 */
+    filter: blur(0.5px);
+}
+
+
+@keyframes flame-flicker {
+    0% { transform: translateX(-50%) scale(1, 1); }
+    30% { transform: translateX(-53%) scale(1.05, 1.1); }
+    60% { transform: translateX(-48%) scale(0.95, 1.05); }
+    100% { transform: translateX(-50%) scale(1.05, 1.15); }
+}
+        
+
+.cake-container {
+    position: relative;
+    margin: 40px auto;
+    width: 320px;
+    height: 280px;
+    perspective: 1000px;
+}
+
+.cake {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) rotateX(10deg);
+    width: 220px;
+    height: 150px;
+    transform-style: preserve-3d;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+
+.cake-layer {
+    position: absolute;
+    width: 100%;
+    height: 50px;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2) inset;
+}
+
+.cake-layer.bottom {
+    bottom: 0;
+    height: 60px;
+    background: linear-gradient(180deg, #d946ef, #a855f7 70%, #9333ea);
+}
+
+.cake-layer.middle {
+    bottom: 60px;
+    width: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 50px;
+    background: linear-gradient(180deg, #ec4899, #db2777 70%, #be185d);
+}
+
+.cake-layer.top {
+    bottom: 110px;
+    width: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 40px;
+    background: linear-gradient(180deg, #f472b6, #ec4899 70%, #db2777);
+}
+
+/* 糖霜优化 */
+.icing {
+    position: absolute;
+    width: 100%;
+    height: 15px;
+    background: linear-gradient(180deg, #fff1f2, #ffe4e6);
+    border-radius: 50%;
+    bottom: 45px;
+    left: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.icing.middle {
+    width: 180px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 105px;
+}
+
+.icing.top {
+    width: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 145px;
+}
+
+/* 新增奶油花装饰 */
+.cream-flower {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: linear-gradient(135deg, #fff, #ffe4e6);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 樱桃优化 */
+.cherry {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background: radial-gradient(circle at 30% 30%, #ff5252, #d32f2f);
+    border-radius: 50%;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+.cherry::before {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 10px;
+    background: linear-gradient(90deg, #8b4513, #a0522d);
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-10deg);
+    border-radius: 5px;
+}
+
+/* 侧面装饰 */
+.side-decoration {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    top: 30%;
+    left: 10%;
+    box-shadow: 0 0 3px rgba(255,255,255,0.5);
+}
+
+/* 蜡烛优化 */
+.candles {
+    position: absolute;
+    top: -90px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    display: flex;
+    justify-content: space-around;
+}
+
+.candle {
+    width: 14px;
+    height: 60px;
+    border-radius: 7px;
+    position: relative;
+    animation: flicker 1.5s infinite alternate;
+    box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+/* 蜡烛条纹 */
+.candle-stripe {
+    position: absolute;
+    width: 3px;
+    height: 100%;
+    background: rgba(255,255,255,0.2);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 火焰优化 */
+.flame {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 30px;
+    background: linear-gradient(to bottom, #fff700, #ff9500 60%, #ff3b00);
+    border-radius: 50% 50% 20% 20%;
+    box-shadow: 0 0 15px #ff9500, 0 0 30px rgba(255,149,0,0.5);
+    animation: flame-flicker 1s infinite alternate;
+    filter: blur(1px);
+    z-index: 2;
+}
+        
+        /* 消息卡片样式 */
+        .message {
+            background: var(--light-bg);
+            backdrop-filter: blur(12px);
+            padding: 35px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(55, 241, 9, 0.2);
+            margin-top: 30px;
+            position: relative;
+            z-index: 5;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: transform 0.3s ease;
+        }
+        
+        .message:hover {
+            transform: translateY(-5px);
+        }
+        
+        .message h2 {
+            color: var(--accent-yellow);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .message p {
+            font-size: 1.3rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        
+     
+        .navigation {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-btn i {
+            font-size: 1.2rem;
+        }
+        
+     
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .photo-frame {
+            background: var(--light-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: transform 0.4s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .photo-frame:hover {
+            transform: translateY(-10px) rotate(2deg);
+        }
+        
+        .photo {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+        
+        .photo-frame:hover .photo {
+            transform: scale(1.05);
+        }
+        
+        .photo-caption {
+            padding: 18px;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.1rem;
+            background: rgba(0,0,0,0.3);
+        }
+        
+       
+        #page3 {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        .secrets-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .secret-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .secret-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .secret-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--accent-yellow);
+        }
+        
+        .secret-title {
+            color: var(--accent-yellow);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 祝福页面样式 */
+        #page4 {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffd166 100%);
+        }
+        
+        .wishes-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .wish-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wish-card:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+        
+        .wish-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--accent-yellow), var(--accent-purple));
+        }
+        
+        .wish-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            color: var(--accent-yellow);
+        }
+        
+        .wish-title {
+            color: var(--accent-yellow);
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+        }
+        
+        /* 未来期望页面样式 */
+        #page6 {
+            background: linear-gradient(135deg, var(--future-orange) 0%, var(--future-yellow) 100%);
+        }
+        
+        .future-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .future-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .future-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        .future-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #ff6b6b, #ffd166);
+        }
+        
+        .future-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .future-title {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .future-card p {
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        /* 音乐页面样式 */
+        .music-player {
+            background: var(--light-bg);
+            padding: 30px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            background: var(--accent-yellow);
+            color: var(--dark-blue);
+            width: 70px;
+            height: 70px;
+        }
+        
+        .play-btn:hover {
+            background: #ffc145;
+        }
+        
+        .song-list {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .song-item {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .song-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .song-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--accent-yellow);
+        }
+        
+        /* 装饰元素 */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+            opacity: 0.7;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+        
+        /* 动漫人物样式 */
+        .character {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .character-1 {
+            bottom: 50px;
+            left: 5%;
+            width: 120px;
+            height: 150px;
+            animation: float-gentle 4s infinite ease-in-out;
+        }
+        
+        .character-2 {
+            top: 100px;
+            right: 5%;
+            width: 100px;
+            height: 130px;
+            animation: float-gentle 5s infinite ease-in-out;
+        }
+        
+        .character-3 {
+            bottom: 100px;
+            right: 10%;
+            width: 80px;
+            height: 100px;
+            animation: float-gentle 3.5s infinite ease-in-out;
+        }
+        
+        @keyframes float-gentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .emoji {
+            font-size: 16.6rem;
+            position: absolute;
+            z-index: 5;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .emoji-1 {
+            top: 15%;
+            left: 10%;
+        }
+        
+        .emoji-2 {
+            top: 25%;
+            right: 15%;
+        }
+        
+        .emoji-3 {
+            bottom: 20%;
+            left: 15%;
+        }
+        
+        .emoji-4 {
+            bottom: 30%;
+            right: 10%;
+        }
+        
+        /* 背景音乐控制按钮 */
+        .bg-music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .bg-music-control:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .bg-music-control i {
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .highlight {
+            color: var(--accent-yellow);
+            font-weight: bold;
+            size: 1.1rem;
+        }
+        
+        .friend-name {
+            color: var(--accent-yellow);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--accent-yellow);
+            font-size: 4rem;
+            text-shadow: 2px 2px 8px rgba(97, 30, 231, 0.3);
+            position: relative;
+        }
+        
+        .page-title::after {
+            content: '';
+            color: var(--dark-blue);
+            position: absolute  ;
+            bottom: -15px;
+            left: 30%;
+            width: 40%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--accent-yellow), transparent);
+        }
+        
+        .heart {
+            color: #ff6b6b;
+            animation: heartbeat 1.5s infinite;
+            display: inline-block;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .page-title {
+                font-size: 2.2rem;
+            }
+            
+            .cake-container {
+                width: 600px;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .nav-btn {
+                width: 80%;
+                justify-content: center;
+            }
+            
+            .photo-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .wishes-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .future-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .character {
+                display: none;
+            }
+            
+            .emoji {
+                font-size: 1.8rem;
+            }
+            
+            .bg-music-control {
+                top: 10px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .bg-music-control i {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景音乐控制按钮 -->
+    <div class="bg-music-control" id="bg-music-control">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    <!-- 返回主页按钮 -->
+    <a href="../root/root.html" class="back-home-btn" title="返回时光机">🏠 返回主页</a>
+    <!-- 页面1: 生日祝福主页 -->
+    <div id="page1" class="page active">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #ff9a9e, #fad0c4); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #ff6b6b; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <div class="character character-2">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #a1c4fd, #c2e9fb); border-radius: 40% 40% 50% 50%; position: relative;">
+                <div style="position: absolute; top: 25px; left: 20px; width: 15px; height: 15px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 25px; right: 20px; width: 15px; height: 15px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 30px; height: 15px; background: #4ecdc4; border-radius: 8px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1" style="left: auto;">🎉</div>
+        <div class="emoji emoji-2"style="left: auto;">🎈</div>
+        <div class="emoji emoji-3"style="left: auto;">✨</div>
+        <div class="emoji emoji-4"style="left: auto;">🥳</div>
+        
+        <div class="container">
+            <div class="header">
+                <h1>生日快乐！<span class="friend-name">最好的小藤子</span></h1>
+                <h2><span class="highlight">祝你20岁生日快乐，希望你20岁以后更加快乐！</span></h2>
+                <h2>注意:这里应该有音乐播放的,需要你手动点击那个小喇叭哟</h2>
+            </div>
+            
+            <div class="cake-container" >
+    <div class="cake">
+        <!-- 蛋糕底层 -->
+        <div class="cake-layer bottom"></div>
+        <!-- 蛋糕中层 -->
+        <div class="cake-layer middle"></div>
+        <!-- 蛋糕顶层 -->
+        <div class="cake-layer top"></div>
+        
+        <!-- 糖霜装饰 -->
+        <div class="icing"></div>
+        <div class="icing middle"></div>
+        <div class="icing top"></div>
+        
+        <!-- 顶部奶油花 -->
+        <div class="cream-flower"></div>
+        <div class="cream-flower" style="left: 30%; top: -20px; transform: rotate(45deg);"></div>
+        <div class="cream-flower" style="left: 70%; top: -25px; transform: rotate(-30deg);"></div>
+        
+        <!-- 樱桃 -->
+        <div class="cherry"></div>
+        
+        <!-- 糖屑 -->
+        <div class="sprinkles" id="sprinkles"></div>
+        
+        <!-- 侧面装饰 -->
+        <div class="side-decoration"></div>
+        <div class="side-decoration" style="left: 25%;"></div>
+        <div class="side-decoration" style="left: 50%;"></div>
+        <div class="side-decoration" style="left: 75%;"></div>
+    </div>
+    
+    <!-- 蜡烛 -->
+    <div class="candles">
+        <div class="candle" style="background: linear-gradient(90deg, #ff6b8b, #ff8fa3, #ff6b8b);">
+            <div class="flame"></div>
+            <div class="candle-stripe"></div>
+        </div>
+        <div class="candle" style="background: linear-gradient(90deg, #4facfe, #00f2fe, #4facfe);">
+            <div class="flame"></div>
+            <div class="candle-stripe"></div>
+        </div>
+        <div class="candle" style="background: linear-gradient(90deg, #ffd166, #ffe66d, #ffd166);">
+            <div class="flame"></div>
+            <div class="candle-stripe"></div>
+        </div>
+        <div class="candle" style="background: linear-gradient(90deg, #06d6a0, #11d3bc, #06d6a0);">
+            <div class="flame"></div>
+            <div class="candle-stripe"></div>
+        </div>
+        <div class="candle" style="background: linear-gradient(90deg, #a855f7, #c084fc, #a855f7);">
+            <div class="flame"></div>
+            <div class="candle-stripe"></div>
+        </div>
+    </div>
+</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 5px; margin: 20px 0;padding: 10px; border-radius: 15px; ">
+                <img src="./images/1444.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(242, 4, 4, 0.859);opacity: 9;" />
+                <img src="./images/144.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(245, 237, 6, 0.949);opacity: 9;" />
+                </div>
+            <div class="message" style="margin-top: 20px;box-shadow: 0 15px 35px rgba(32, 241, 4, 0.2);">
+                <img src="./images/20.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;box-shadow: 0 5px 15px rgba(4, 242, 179, 0.92);" />
+                
+                <p>在这个特别的日子里，我想对你说,要做一个快乐的小藤子，不许你不开心哦~我要你一直一直快乐！（注：以下内容可能有点煽情）</p>
+                <p>好快啊，转眼间咱们都已经20岁了，还记得咱们结识于高一，那个时候16岁吧，现在都已经开始奔三了
+                    哈哈哈！但是不管岁月如何流转，<span class="highlight">我们的友谊</span>依然坚固如初。</p>
+                <p>你是一个<span class="highlight">善良</span>、<span class="highlight">聪明</span>、<span class="highlight">有趣</span>的人，</p>  
+                <p>我真的很庆幸能有你这样的朋友。。。。。先到这里，更煽情的话留在后面吧：下面是比较书面的祝福啦：</p>
+                <p>祝福来啦啦啦啦啦啦</p>
+                <p>在这个特殊的一天，你已经迈入20岁的门槛，愿你今后的<span class="highlight">每一天</span>都充满阳光和欢笑，</p>
+                <p>愿你的<span class="highlight">每一个梦想</span>都能成真，
+                <img src="./images/14.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;box-shadow: 0 5px 15px rgba(4, 48, 242, 0.973);" />
+                <h2>嘻嘻嘻其实我文采不是很好，祝福的话也不够特别，但是祝福是真的噢</h2></p>
+                <p>愿你的<span class="highlight">每一年</span>都比上一年更加精彩！</p>
+                <p>愿你的<span class="highlight">每一刻</span>都充满快乐和惊喜！</p>
+                <p>希望你今后没有所谓的忧愁，但是愿你能勇敢面对生活中的一切挑战。</p>
+                <p>胡思乱想很正常，我们才20岁，正是<strong>思考人生</strong>的好时机！放心，你任何时候
+                不管有什么忧愁都可以和我说哦，我一直在。怎么说着说着又开始煽情了呢，停，今天是开心的日子，不许煽情</p>
+                <p>最后，但仅仅是这一页最后：愿我们的友谊<span class="highlight">天长地久</span>！</p>
+                <p>愿你在未来的日子里，<span class="highlight">继续保持这份善良、聪明和有趣，成为更好的自己！我们身边都要一直有彼此呀</span></p>
+                <p style="text-align: center; margin-top: 20px;">🎂 🎉 🎈 <span class="heart">❤️
+                    请继续往后看吧！
+                </span></p>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" onclick="showPage(2)"><i class="fas fa-images"></i> 第一个先点这里哟-->属于我们的美好回忆</button>
+                <button class="nav-btn" onclick="showPage(3)"><i class="fas fa-lock"></i> 嘘，请保持安静，属于我们的小秘密来咯</button>
+                <button class="nav-btn" onclick="showPage(4)"><i class="fas fa-birthday-cake"></i> 祝福祝福祝福生日祝福必须有</button>
+                <button class="nav-btn" onclick="showPage(5)"><i class="fas fa-music"></i> 窃窃私语一下了，属于我们的音乐时光</button>
+                <button class="nav-btn" onclick="showPage(6)"><i class="fas fa-star"></i> 畅想一下美好未来叭</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面2: 照片展示 -->
+    <div id="page2" class="page">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #ffecd2, #fcb69f); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #ff9a8b; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1">📸</div>
+        <div class="emoji emoji-2">😊</div>
+        <div class="emoji emoji-3">🌟</div>
+        <div class="emoji emoji-4">💖</div>
+        
+        <div class="container">
+            <div class="home-cake" onclick="showPage(1)">
+                <div class="cake-base"></div>
+                <div class="cake-top-mini"></div>
+                <div class="candle-mini"></div>
+                <div class="flame-mini"></div>
+            </div>
+            
+            <h2 class="page-title">我会一直偷偷记录你的成长</h2>
+            
+            <div class="photo-gallery">
+                <div class="photo-frame">
+                    <img class="photo" src="./images/11.jpg" />
+                    <div class="photo-caption">旅行的美好时光:<span class="highlight">只是陪着你的不是我</span></div>
+                </div>
+                
+                <div class="photo-frame">
+                    <img class="photo" src="./images/12.jpg" />
+                    <div class="photo-caption">在专业领域的成长:<span class="highlight">you are the best where in your field!</span></div>
+                </div>
+                
+                <div class="photo-frame">
+                    <img class="photo" src="./images/13.jpg" />
+                    <div class="photo-caption">这个千禧妆造好看哎，感觉拽拽的，不好惹，以后多尝试尝试</div>
+                </div>
+                
+                <div class="photo-frame">
+                    <img class="photo" src="./images/10.jpg" />
+                    <div class="photo-caption">这个更拽哈哈哈哈哈，但是显得眼睛不大，你可以试试双眼皮贴</div>
+                </div>
+                
+                <div class="photo-frame">
+                    <img class="photo" src="./images/9.jpg" />
+                    <div class="photo-caption">这个长腿藤一直陪着我呢，腿真的很长嘿嘿，很可爱，喜欢</div>
+                </div>
+                
+                <div class="photo-frame">
+                    <img class="photo" src="./images/8.jpg" />
+                    <div class="photo-caption">今天我已经附身在它身上了，和它说好了</div>
+                </div>
+                <div class="photo-frame">
+                    <img class="photo" src="./images/7.jpg" />
+                    <div class="photo-caption">我真的好喜欢这个照片，好温柔好温柔，你不会是真的格格吧，太好看了吧</div>
+                </div>
+                <div class="photo-frame">
+                    <img class="photo" src="./images/6.jpg" />
+                    <div class="photo-caption">好可爱好可爱，女大18变，这变得，<span class="highlight">以后到底便宜哪家臭小子了</span></div>
+                </div>
+                <div class="photo-frame">
+                    <img class="photo" src="./images/5.jpg" />
+                    <div class="photo-caption">哎呀格格您吉祥呀美死了</div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" onclick="showPage(1)"><i class="fas fa-home"></i> 返回首页</button>
+                <button class="nav-btn" onclick="showPage(3)"><i class="fas fa-lock"></i> 好了请点击下一个-->关于我们的小秘密</button>
+                <button class="nav-btn" onclick="showPage(4)"><i class="fas fa-birthday-cake"></i> 生日祝福</button>
+                <button class="nav-btn" onclick="showPage(5)"><i class="fas fa-music"></i> 生日音乐</button>
+                <button class="nav-btn" onclick="showPage(6)"><i class="fas fa-star"></i> 美好未来</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面3: 小秘密页面 -->
+    <div id="page3" class="page">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #a8e6cf, #d4a5a5); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #a855f7; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1">🤫</div>
+        <div class="emoji emoji-2">🔐</div>
+        <div class="emoji emoji-3">💭</div>
+        <div class="emoji emoji-4">✨</div>
+        
+        <div class="container">
+            <div class="home-cake" onclick="showPage(1)">
+                <div class="cake-base"></div>
+                <div class="cake-top-mini"></div>
+                <div class="candle-mini"></div>
+                <div class="flame-mini"></div>
+            </div>
+            
+            <h2 class="page-title">我们的小秘密</h2>
+            
+            <div class="secrets-container">
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密One</div>
+                    <p><span style="font-weight: bold;color: #5911e9;">还记得我们第一次见面吗？好吧，我对高中的记忆有点模糊了，但是我记得你当时穿着一件黄色的衬衫。当时在想
+                        为什么这个小女孩有那么多黄色的衣服，不过黄色的衣服还挺好看的，也可能是人好看，穿啥都好看吧！记得感情慢慢
+                        变深是做了同桌之后，那个时候我状态真的不好，你还记得吗？我那时候总是心情不好，可能是因为高一的压力吧，
+                        但是你性格就是大大咧咧的，那个时候就觉得这个小姑娘可能是以后我的好朋友，我第六感很不准的，但是庆幸，我没猜错！那次</span>
+                    </p>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密Two</div>
+                   <p><span style="font-weight: bold;color: #0a3ad7;">你知道的，我很讨厌我的高中，我记得上次也和你说过，我
+                    对我的高中生活是很反感的，因为我觉得我被孤立了，被排斥了，我觉得我很难融入集体，而且那个时候就说压力大，想得多，
+                    但是你知道吗？你是我高中生活里唯一的光亮，是你让我觉得高中生活也没那么糟糕，是你让我觉得我不是一个人面对这些困难的，
+                    是你让我觉得我还有朋友，还有人关心我，还有人愿意陪我聊天，愿意听我说话，愿意和我分享她的生活，愿意和我一起度过那些难熬的日子。
+                    其实有时候我都在想，我如果没有考定陶一中就好了，我的人生就不会变得那么糟糕，但是一想到那样就没法认识你了，还是算了吧
+                    你知道我不是一个善于表达的人，我有时候会把心里的话埋得很深，但我希望你能知道，我真的很珍惜我们的友谊。我一旦认定一个人
+                    可是一辈子的，所以，小藤子，很开心遇到你</span></p>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密Three</div>
+                    <p><span style="font-weight: bold;color: #0abfd7;">其实我有想过，再好的朋友也会因为距离而渐行渐远，但我希望我们的友谊能够经得起时间和距离的考验。
+                    无论未来我们身处何地，我都希望我们能够保持联系，分享彼此的生活和心情。毕竟，真正的友谊是不受时间和空间限制的。但是放心，我不会让距离影响我们的友谊的，我会努力保持联系的，不管我们身处何地，我们的友谊都会一直存在的！
+                    好快啊，你已经大三了，马上就要成为小大人了，到了自己挣钱自己花的年纪了，记得要好好照顾自己哦！加油哦！有什么事情都不是事，你的身后有我呢！
+                    我也坚信，我的身边会一直有你这个好朋友陪伴着我。
+                    </span></p>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密Four</div>
+                    <p><span style="font-weight: bold;color: #0aec9d;">
+                    其实我一直有一个想法，就是和好朋友一起去旅行，去看看这个世界的美好。我们可以一起去海边晒太阳，一起去山上看风景，
+                    反正只要是和好朋友在一起，我就很开心，什么时候可以实现呀？期待ing！等我们毕业，等我们工作，还是等我们都有了
+                    各自喜欢的事业呀，不行，我很喜欢一句话“欲买桂花同载酒，终不似，少年游”，我们一定要多出去玩玩，多看看这个世界，多体验不同的生活，
+                    多拍一些美美的照片，留下更多美好的回忆！等我打完这场仗，我们就要去旅游，去买美美的照片
+                    </span></p>
+                </div>
+                
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密Five</div>
+                    <p><span style="font-weight: bold;color: #d20aec;">
+                    哎现在好想你们在我身边呀，好想和你们一起吃饭，一起聊天，一起玩耍，一起分享生活的点点滴滴，
+                    好想和你们一起度过每一个重要的时刻，一起庆祝彼此的生日，一起迎接新年的到来，一起分享生活中的喜怒哀乐，
+                    好想和你们一起创造更多美好的回忆，一起走过人生的每一个阶段，一起见证彼此的成长和变化，
+                    好想和你们一起变老，一起回忆起我们年轻时的疯狂和梦想，一起笑着回忆起那些美好的时光，
+                    不管，我们未来会一直在一起的，对吧？</span></p>
+                    </span></p>
+                </div>
+                <div class="secret-card">
+                    <div class="secret-title"><i class="fas fa-key"></i> 秘密Six</div>
+                    <p><span style="font-weight: bold;color: #d4ff00;">
+                    其实在给你做这个网站的时候，也算是对自己的放松吧，我太累了，其实好想哭一场，不知道为什么？我觉得我最近压力好大，
+                    祝你快乐，也希望我可以快乐，只有在做网站的时候我才不会想别的，不说那么多了，这个网站可是我历经一个星期的成果哦
+                    希望你会喜欢，也希望我能蹭一下你的快乐
+                    </span></p>
+                    </span></p>
+                </div>
+            </div>
+            
+            <div class="navigation">  
+                <button class="nav-btn" onclick="showPage(1)"><i class="fas fa-home"></i> 返回首页</button>
+                <button class="nav-btn" onclick="showPage(2)"><i class="fas fa-images"></i> 美好回忆</button>
+                <button class="nav-btn" onclick="showPage(4)"><i class="fas fa-birthday-cake"></i> 接下来点这里-->小寿星请接收属于你的生日祝福</button>
+                <button class="nav-btn" onclick="showPage(5)"><i class="fas fa-music"></i> 生日音乐</button>
+                <button class="nav-btn" onclick="showPage(6)"><i class="fas fa-star"></i> 美好未来</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面4: 祝福页面 -->
+    <div id="page4" class="page">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #ff9a8b, #f68084); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #ff6b6b; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1">🎂</div>
+        <div class="emoji emoji-2">🎁</div>
+        <div class="emoji emoji-3">💝</div>
+        <div class="emoji emoji-4">🎊</div>
+        
+        <div class="container">
+            <div class="home-cake" onclick="showPage(1)">
+                <div class="cake-base"></div>
+                <div class="cake-top-mini"></div>
+                <div class="candle-mini"></div>
+                <div class="flame-mini"></div>
+            </div>
+            
+            <h2 class="page-title">给属于小藤子一个人的祝福 <span style="color:#0a3ad7; position:relative;">🎉请注意接收哦🎉记得打开声音</span></h2>
+            <div style="text-align: center; margin: 30px 0; " >
+            <video src="./media/happy.mp4" controls
+            width="800"
+            autoplay muted
+            loop
+            ></video>
+            </div>
+            <div class="wishes-container">
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-heart"></i></div>
+                    <div class="wish-title">最最最重要的is健康与快乐</div>
+                    <p>愿你身体健康，每天都充满活力和正能量！愿快乐永远伴随你，让微笑成为你最美丽的装饰。
+                        记住，你才20岁，还是一个小孩子，不要妄想把伤心难过的事情自己扛着，遇到困难要学会和朋友家人倾诉哦！快乐最重要！
+                    </p>
+                </div>
+                
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-star"></i></div>
+                    <div class="wish-title">事业与梦想</div>
+                    <p>愿你在事业上步步高升，实现所有的梦想和目标！愿你的努力都有回报，付出都有收获。
+                        我们正处于对未来道路的探索阶段，请接受自己的不完美，勇敢追求自己的梦想吧！
+                        我在幻想，未来的某一天，我们都实现了自己的梦想，然后一起去旅行庆祝！
+                        未来的你，可能是一名优秀的人民教室，可能是一名出色的设计师，可能是一名成功的创业者，
+                        也可能是一名自由职业者，无论你成为什么样的人，我都为你感到骄傲！因为你是我亲自选的朋友！
+                    </p>
+                </div>
+                
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-users"></i></div>
+                    <div class="wish-title">愿我们友谊长存</div>
+                    <p>感谢你出现在我的生命中，愿我们的友谊像美酒一样，越陈越香！无论距离多远，我们的心永远在一起。
+                        不管我们以后身处五湖四海，还是天涯海角，不管以后有没有各自的生活，我们都要一直保持联系哦！
+                        我坚信，未来会有很多变量，但是唯一不变的，就是我们之间的友谊！我可是会像守护宝藏一样守护我们的友谊的哦！
+                        我认定你了，小藤子！
+                    </p>
+                </div>
+                
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-sun"></i></div>
+                    <div class="wish-title">不要怕，大胆往前走吧</div>
+                    <p>我们都是奇思妙想小小🐏，再大的困难都不怕，觉得困难的话就大声说出来，我们一起面对！这不仅是说给你听的
+                        更是和我自己说的，我是一个不太擅长表达自己情绪的人，有时候遇到困难也会选择逃避，但是我知道你会在我身边支持我。
+                        所以，我每一次伤心emo都会和你说话，因为我知道你会理解我，会支持我，会陪伴我。
+                    </p>
+                </div>
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-star"></i></div>
+                    <div class="wish-title">年少的朋友是彼此青春的收藏家</div>
+                    <p>
+                    愿我们都能成为彼此青春的收藏家，珍藏那些年少时光里的欢笑与泪水。无论未来如何变迁，
+                    我们都能回忆起那些美好的时光，感受到彼此的温暖与支持。愿我们的友谊如同星辰般璀璨，照亮彼此的前行之路。
+                    我的青春因为有你而更加精彩，谢谢你陪我走过那段时光！放心，我们的青春还在继续，我们的故事还在继续！
+                    </p>
+                </div>
+                <div class="wish-card">
+                    <div class="wish-icon"><i class="fas fa-heart"></i></div>
+                    <div class="wish-title">请享受你这灿烂的青春吧</div>
+                    <p>
+                    在这浪漫的20岁，请享受过程，勇敢的去做你认知正确的事情，永远对自己保有无限期待，祝热烈，祝自由，祝你所有眼泪都献给幸福！
+                    </p>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" onclick="showPage(1)"><i class="fas fa-home"></i> 返回首页</button>
+                <button class="nav-btn" onclick="showPage(2)"><i class="fas fa-images"></i> 美好回忆</button>
+                <button class="nav-btn" onclick="showPage(3)"><i class="fas fa-lock"></i> 小秘密</button>
+                <button class="nav-btn" onclick="showPage(5)"><i class="fas fa-music"></i> 下个part给藤藤的生日音乐（快来听听吧！）</button>
+                <button class="nav-btn" onclick="showPage(6)"><i class="fas fa-star"></i> 美好未来</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面5: 音乐页面 -->
+    <div id="page5" class="page">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #a6c0fe, #f68084); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #4a6bff; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1">🎵</div>
+        <div class="emoji emoji-2">🎶</div>
+        <div class="emoji emoji-3">🎤</div>
+        <div class="emoji emoji-4">🎧</div>
+        
+        <div class="container">
+            <div class="home-cake" onclick="showPage(1)">
+                <div class="cake-base"></div>
+                <div class="cake-top-mini"></div>
+                <div class="candle-mini"></div>
+                <div class="flame-mini"></div>
+            </div>
+            
+            <h2 class="page-title">生日音乐派对</h2>
+            
+            <div class="music-player">
+                <h3>生日快乐播放列表</h3>
+                <p>点击播放，让音乐为你的生日增添欢乐！</p>
+                
+                <div class="player-controls">
+                    <button class="control-btn" id="prev-btn"><i class="fas fa-backward"></i></button>
+                    <button class="control-btn play-btn" id="play-btn"><i class="fas fa-play"></i></button>
+                    <button class="control-btn" id="next-btn"><i class="fas fa-forward"></i></button>
+                </div>
+                
+                <!-- 隐藏的音频元素 -->
+                <audio id="audio-player" preload="metadata"></audio>
+                
+                <div class="song-list" id="song-list">
+                   
+                </div>
+                
+                <div class="music-instructions">
+                    <h4>我的悄悄话only说给你听</h4>
+                    <p>未完待续！</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 5px; margin: 20px 0;padding: 10px; border-radius: 15px; ">
+                    <img src="./images/15.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgb(242, 167, 4);opacity: 9;" />
+                    <img src="./images/27.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(245, 237, 6, 0.949);opacity: 9;" />
+                    <img src="./images/28.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(4, 242, 48, 0.973);opacity: 9;" />
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" onclick="showPage(1)"><i class="fas fa-home"></i> 返回首页</button>
+                <button class="nav-btn" onclick="showPage(2)"><i class="fas fa-images"></i> 美好回忆</button>
+                <button class="nav-btn" onclick="showPage(3)"><i class="fas fa-lock"></i> 小秘密</button>
+                <button class="nav-btn" onclick="showPage(4)"><i class="fas fa-birthday-cake"></i> 生日祝福</button>
+                <button class="nav-btn" onclick="showPage(6)"><i class="fas fa-star"></i> 快来这里，展望美好未来</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 页面6: 未来期望页面 -->
+    <div id="page6" class="page">
+        <!-- 动漫人物 -->
+        <div class="character character-1">
+            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #ffd166, #ff9a3c); border-radius: 50% 50% 40% 40%; position: relative;">
+                <div style="position: absolute; top: 20px; left: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; top: 20px; right: 30px; width: 20px; height: 20px; background: #000; border-radius: 50%;"></div>
+                <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); width: 40px; height: 20px; background: #ff6b6b; border-radius: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- 表情包 -->
+        <div class="emoji emoji-1">🚀</div>
+        <div class="emoji emoji-2">🌟</div>
+        <div class="emoji emoji-3">💫</div>
+        <div class="emoji emoji-4">🌈</div>
+        
+        <div class="container">
+            <div class="home-cake" onclick="showPage(1)">
+                <div class="cake-base"></div>
+                <div class="cake-top-mini"></div>
+                <div class="candle-mini"></div>
+                <div class="flame-mini"></div>
+            </div>
+            
+            <h2 class="page-title">期望我们美好未来</h2>
+            
+            <div class="future-container">
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="future-title">生日快乐</div>
+                    <p>
+                        <img src="./images/2.jpg" alt="啦啦啦" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/3.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        把我的照片放上去也算是合照了，咱们合照太少了，都没找到几张
+                        不行，以后我们要多拍合照，留作纪念，都找不到素材，这怎么行呢
+                        年轻的小藤子女士：愿你人生硕果累累，没有任何东西将阴影投射其上
+                        生命没有那么多意义，祝你生动，祝你昂扬向上！祝你永远是你！生日快乐！
+                        明媚是你，淡然是你，澄澈是你，灿烂如阳光也是你
+                        我的朋友，你真的值得世界上一切美好的东西！（天哪，灵感爆棚了哈哈哈）
+                    </p>
+                </div>
+                
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-heartbeat"></i></div>
+                    <div class="future-title">可恶，又陪你老了一岁</div>
+                    <p>
+                        <img src="./images/4.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/7.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/1.jpg" alt="我的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        漫长岁月我们一起长大，一起快乐，一起看世界，我最爱的女孩永远18岁
+                        愿你不卑不亢，愿你随意而为，愿你心怀梦想，愿你勇敢追求，能笑能闹能随性，敢爱敢恨敢追逐
+                        愿你此生，梦想光芒，野蛮生长！永不彷徨！
+                    </p>
+                </div>
+                
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-globe-americas"></i></div>
+                    <div class="future-title">请我的女孩永远相信自己</div>
+                    <p>
+                        <img src="./images/5.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/6.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        每一岁都能奔走在自己的热爱里；祝我的女孩未来暴富，然后养我嘿嘿嘿嘿
+                        祝我们爬不同的山，还能回到同一条路上，不是时时见面，但是是时时惦记之人
+                        ps：照片里的你真的是太美了，完全是我理想中的女朋友形象了，哈哈哈哈哈，下次拍照一定要多拍几张这种风格的照片，太好看了
+                        下面那个照片好像一个精致的瓷娃娃，真的太美了吧！
+                    </p>
+                </div>
+                
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="future-title"></div>
+                    <p>
+                        <img src="./images/16.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/17.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/18.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        祝福的话太多太多，每一句话都是我对你的祝福与期望！
+                        希望一切都好，希望所有的俗套的祝福在你身上都能灵验！
+                        希望你快乐，不止生日快乐，每一天都快乐！
+                        
+                        批注：果然，当我听emo的歌曲的时候，灵感就来了，哈哈哈哈哈，挡都挡不住了
+                            我太有才了吧！这个生日祝福简直是我写过的最棒的祝福了！这个网站你要一直一直留着哈，我可是会时常更新的
+                            等我有能力了，我还要把它开发成一个网址，我还要为它买域名，哈哈哈哈哈，到时候你就可以随时随地打开它，看到我为你写的祝福了！
+                            期待ing！没想到我人生的第一个独立开发的项目是为你而写的生日祝福网站，哈哈哈哈哈，真是太有意义了！
+                        
+                    </p>
+                </div>
+                
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-laugh-beam"></i></div>
+                    <div class="future-title">愿我们嘴边的碎碎念念能够成为身边的岁岁年年</div>
+                    <p>
+                        <img src="./images/23.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/25.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/24.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/26.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        深话浅说，长路慢走，没有煽情语录，只希望你一切都好，希望你永远快乐
+                        我是一个不善言辞的人，但是我希望你知道，你是我最重要的朋友
+                        我是一个怀旧的人，但是我更期待未来的我们
+                        向上向前，奔跑吧，我们！
+
+                        
+                    </p>
+                </div>
+                
+                <div class="future-card">
+                    <div class="future-icon"><i class="fas fa-rocket"></i></div>
+                    <div class="future-title">也不知道便宜哪个男生了！！！最后最后，未完待续，我们的故事还在加载中...</div>
+                    <p>
+                        <img src="./images/19.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/21.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        <img src="./images/22.jpg" alt="你的照片也要出现在这里" style="width: 100%; max-width: 300px; display: block; margin: 10px auto; border-radius: 10px;" />
+                        最后我想说：以后你人生的每个阶段，我预约了，大学毕业，工作，结婚，生子，所有的美好时刻，我都会陪在你身边！
+                        结婚我要做伴娘，生孩子我要做干妈，带孩子我要做保姆，带你旅行我要做司机，反正我就是要一直陪着你！
+                        未来可期，我们的故事还在继续！哈哈哈哈哈好像扯远了，总之，生日快乐，我的好朋友！我们的未来一定会很美好！
+                        太远的先不说，一年后的今天，我们一起去旅行，好不好？期待ing！那时你的未来肯定已经开始闪闪发光了！我也是的
+                        我们都在努力奔跑着，向着各自的梦想前进着，我们一定会实现自己的梦想的！
+                        未完待续！
+                    </p>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="nav-btn" onclick="showPage(1)"><i class="fas fa-home"></i> 返回首页</button>
+                <button class="nav-btn" onclick="showPage(2)"><i class="fas fa-images"></i> 美好回忆</button>
+                <button class="nav-btn" onclick="showPage(3)"><i class="fas fa-lock"></i> 小秘密</button>
+                <button class="nav-btn" onclick="showPage(4)"><i class="fas fa-birthday-cake"></i> 生日祝福</button>
+                <button class="nav-btn" onclick="showPage(5)"><i class="fas fa-music"></i> 生日音乐</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="floating-elements" id="floatingElements"></div>
+
+    <!-- 背景音乐 -->  
+    <audio id="bg-music" loop>
+        
+        <source src="./media/喜羊羊童星合唱团 - 奇思妙想喜羊羊.mp3" type="audio/mp3">
+        您的浏览器不支持音频元素。
+    </audio>
+
+    <script>
+        // 背景音乐控制
+        function setupBackgroundMusic() {
+            const bgMusic = document.getElementById('bg-music');
+            const bgMusicControl = document.getElementById('bg-music-control');
+            const bgMusicIcon = bgMusicControl.querySelector('i');
+            
+            let isPlaying = false;
+            
+            // 尝试自动播放背景音乐
+            function tryPlayBackgroundMusic() {
+                bgMusic.play().then(() => {
+                    isPlaying = true;
+                    bgMusicIcon.classList.remove('fa-volume-mute');
+                    bgMusicIcon.classList.add('fa-volume-up');
+                }).catch(error => {
+                    console.log('自动播放被阻止，需要用户交互');
+                    isPlaying = false;
+                    bgMusicIcon.classList.remove('fa-volume-up');
+                    bgMusicIcon.classList.add('fa-volume-mute');
+                });
+            }
+            
+            // 点击控制按钮
+            bgMusicControl.addEventListener('click', function() {
+                if (isPlaying) {
+                    bgMusic.pause();
+                    bgMusicIcon.classList.remove('fa-volume-up');
+                    bgMusicIcon.classList.add('fa-volume-mute');
+                } else {
+                    bgMusic.play();
+                    bgMusicIcon.classList.remove('fa-volume-mute');
+                    bgMusicIcon.classList.add('fa-volume-up');
+                }
+                isPlaying = !isPlaying;
+            });
+            
+            // 尝试自动播放
+            tryPlayBackgroundMusic();
+            
+            // 当页面可见时尝试重新播放（解决浏览器自动播放限制）
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && isPlaying) {
+                    bgMusic.play();
+                }
+            });
+        }
+        
+        // 音乐播放器功能
+        function setupMusicPlayer() {
+           
+            const playlist = [
+                {
+                    title: "生日快乐歌",
+                    artist: "传统版本",
+                    duration: "2:15",
+                    
+                    src: "./media/生日快乐.mp3"
+                },
+                {
+                    title: "我想对你说1.0.0",
+                    artist: "小萍子",
+                    duration: "3:40",
+                    
+                    src: "./media/2.mp3"
+                },
+                {
+                    title: "我想对你说2.0.0",
+                    artist: "小萍子",
+                    duration: "3:53",
+                    
+                    src: "./media/3.mp3"
+                },
+                {
+                    title: "我想对你说3.0.0",
+                    artist: "小萍子",
+                    duration: "3:14",
+                    
+                    src: "./media/4.mp3"
+                },
+                {
+                    title: "我的小情绪只跟你讲",
+                    artist: "小萍子",
+                    duration: "6:14",
+                    
+                    src: "./media/1.mp3"
+                }
+            ];
+            
+            const audioPlayer = document.getElementById('audio-player');
+            const playBtn = document.getElementById('play-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const songList = document.getElementById('song-list');
+            
+            let currentSongIndex = 0;
+            let isPlaying = false;
+            
+            // 生成歌曲列表
+            function renderPlaylist() {
+                songList.innerHTML = '';
+                playlist.forEach((song, index) => {
+                    const songItem = document.createElement('div');
+                    songItem.classList.add('song-item');
+                    if (index === currentSongIndex) {
+                        songItem.classList.add('active');
+                    }
+                    
+                    songItem.innerHTML = `
+                        <i class="fas fa-music"></i>
+                        <div>
+                            <div>${song.title} - ${song.artist}</div>
+                            <div style="font-size: 0.9rem; opacity: 0.7;">${song.duration}</div>
+                        </div>
+                    `;
+                    
+                    songItem.addEventListener('click', () => {
+                        playSong(index);
+                    });
+                    
+                    songList.appendChild(songItem);
+                });
+            }
+            
+            // 播放指定歌曲
+            function playSong(index) {
+                currentSongIndex = index;
+                audioPlayer.src = playlist[currentSongIndex].src;
+                audioPlayer.play();
+                isPlaying = true;
+                updatePlayButton();
+                renderPlaylist();
+            }
+            
+            // 更新播放按钮状态
+            function updatePlayButton() {
+                const icon = playBtn.querySelector('i');
+                if (isPlaying) {
+                    icon.classList.remove('fa-play');
+                    icon.classList.add('fa-pause');
+                } else {
+                    icon.classList.remove('fa-pause');
+                    icon.classList.add('fa-play');
+                }
+            }
+            
+            // 播放/暂停
+            playBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                } else {
+                    if (audioPlayer.src) {
+                        audioPlayer.play();
+                    } else {
+                        playSong(currentSongIndex);
+                    }
+                }
+                isPlaying = !isPlaying;
+                updatePlayButton();
+            });
+            
+            // 上一首
+            prevBtn.addEventListener('click', function() {
+                currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+                playSong(currentSongIndex);
+            });
+            
+            // 下一首
+            nextBtn.addEventListener('click', function() {
+                currentSongIndex = (currentSongIndex + 1) % playlist.length;
+                playSong(currentSongIndex);
+            });
+            
+            // 歌曲结束自动播放下一首
+            audioPlayer.addEventListener('ended', function() {
+                currentSongIndex = (currentSongIndex + 1) % playlist.length;
+                playSong(currentSongIndex);
+            });
+            
+            // 初始化播放列表
+            renderPlaylist();
+        }
+        
+        // 显示指定页面
+        function showPage(pageNumber) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // 显示指定页面
+            document.getElementById('page' + pageNumber).classList.add('active');
+        }
+        
+        // 创建浮动元素
+        function createFloatingElements() {
+            const container = document.getElementById('floatingElements');
+            const shapes = ['circle', 'square', 'triangle'];
+            const colors = ['#ffd166', '#a855f7', '#4a6bff', '#ff6b6b', '#4ecdc4'];
+            
+            for (let i = 0; i < 25; i++) {
+                const element = document.createElement('div');
+                element.classList.add('floating-element');
+                
+                // 随机属性
+                const size = Math.random() * 30 + 10;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100;
+                const delay = Math.random() * 20;
+                const duration = Math.random() * 15 + 15;
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                element.style.backgroundColor = color;
+                element.style.left = `${left}%`;
+                element.style.animationDelay = `${delay}s`;
+                element.style.animationDuration = `${duration}s`;
+                
+                if (shape === 'square') {
+                    element.style.borderRadius = '5px';
+                } else if (shape === 'triangle') {
+                    element.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+                    element.style.borderRadius = '0';
+                }
+                
+                container.appendChild(element);
+            }
+        }
+        
+        
+        function createSprinkles() {
+            const container = document.getElementById('sprinkles');
+            const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a855f7', '#4a6bff'];
+            
+            for (let i = 0; i < 20; i++) {
+                const sprinkle = document.createElement('div');
+                sprinkle.classList.add('sprinkle');
+                
+                // 随机属性
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100;
+                const delay = Math.random() * 3;
+                const duration = Math.random() * 2 + 2;
+                
+                sprinkle.style.backgroundColor = color;
+                sprinkle.style.left = `${left}%`;
+                sprinkle.style.animationDelay = `${delay}s`;
+                sprinkle.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(sprinkle);
+            }
+        }
+        
+        // 蜡烛闪烁效果增强
+        function enhanceCandles() {
+            const flames = document.querySelectorAll('.flame');
+            flames.forEach(flame => {
+                setInterval(() => {
+                    const scaleX = 0.8 + Math.random() * 0.4;
+                    const scaleY = 0.9 + Math.random() * 0.4;
+                    flame.style.transform = `translateX(-50%) scaleY(${scaleY}) scaleX(${scaleX})`;
+                }, 200);
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createFloatingElements();
+            createSprinkles();
+            enhanceCandles();
+            setupBackgroundMusic();
+            setupMusicPlayer();
+            
+            
+            const friendNameElement = document.querySelector('.friend-name');
+            if (friendNameElement) {
+        
+                friendNameElement.textContent = "最好的小藤子";
+            }
+        });
+    </script>
+</body>
+</html>
